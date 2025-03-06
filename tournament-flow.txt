@@ -1,0 +1,19 @@
+** for reader's reference only
+
+how APU runs the tennis tournament:
+- all matches are mixed-gender singles
+- all matches are held in May (fixed dates)
+- player withdrawals = immediate substitute, no rescheduling
+
+qualifying
+- 1v1 based on rank and order of register
+- 24 out of 48 will advance
+
+round-robin
+- the 24 qualified players are divided into 6 groups (4 per group)
+- every player will play against each person within the group
+- the player with most wins from each group advances (total: 6 finalists)
+
+knockout rounds
+- 6 players play in brackets (players with top 2 ranks start at semi-finals)
+- final winner is determined
