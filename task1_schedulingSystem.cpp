@@ -674,7 +674,7 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     };
     
     // Lambda function to simulate match and determine winner
-    auto simMatch = [&](Match* match, string& winner) {
+    auto simulateMatch = [&](Match* match, string& winner) {
         // Skip invalid matches
         if (!match || match->player1 == "NA" || match->player2 == "NA") return;
         
@@ -698,21 +698,21 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     
     // Simulate quarterfinal matches
     for (int i = 0; i < qf_index; i++) {
-        simMatch(qf[i], qfWin[i]);
+        simulateMatch(qf[i], qfWin[i]);
     }
     
     // Simulate semifinal matches with quarterfinal winners
     for (int i = 0; i < sf_index; i++) {
         // Update semifinal bracket with quarterfinal winner
         if (sf[i]->player2 == "NA") sf[i]->player2 = qfWin[i];
-        simMatch(sf[i], sfWin[i]);  // Simulate match
+        simulateMatch(sf[i], sfWin[i]);  // Simulate match
     }
     
     // Simulate final match with semifinal winners
     if (final) {
         final->player1 = sfWin[0];  // First finalist
         final->player2 = sfWin[1];  // Second finalist
-        simMatch(final, champion);  // Determine champion
+        simulateMatch(final, champion);  // Determine champion
     }
     
     // Display tournament results
