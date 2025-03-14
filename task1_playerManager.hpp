@@ -84,7 +84,6 @@ public:
         return player;
     }
     
-    // not used, might delete
     Player* peek() const {
         if (isEmpty()) {
             throw runtime_error("(!) PlayersQueue is empty");
@@ -101,99 +100,6 @@ public:
     }
 };
    
-// Player class - circular queue for players who will participate in round robin
-class CircularPlayersQueue {
-private:
-    struct Node {
-        Player* data;
-        Node* next;
-    };
-    Node* head;
-    Node* tail;
-    int count;
-
-public:
-    CircularPlayersQueue() {
-        head = nullptr;
-        tail = nullptr;
-        count = 0;
-    }
-    
-    ~CircularPlayersQueue() {
-        clear();
-    }
-
-    void clear() {
-        while (!isEmpty()) {
-            dequeue(); // Remove all nodes safely
-        }
-    }
-    
-    void enqueue(Player* player) {
-        Node* newNode = new Node;
-        newNode->data = player;
-
-        if (isEmpty()) {
-            head = newNode;
-            tail = newNode;
-            newNode->next = head; // Circular link
-        } else {
-            tail->next = newNode;
-            newNode->next = head; // Maintain circular link
-            tail = newNode; // Update tail
-        }
-        count++;
-    }
-
-    Player* dequeue() {
-        if (isEmpty()) {
-            throw runtime_error("(!) CircularPlayersQueue is empty");
-        }
-
-        Player* removedPlayer = head->data;
-        if (count == 1) {
-            delete head;
-            head = nullptr;
-            tail = nullptr;
-        } else {
-            Node* temp = head;
-            head = head->next;
-            tail->next = head; // Maintain circular link
-            delete temp;
-        }
-        count--;
-        return removedPlayer;
-    }
-
-    void rotate() {
-        if (count > 1) {
-            head = head->next;
-            tail = tail->next;
-        }
-    }
-    
-    Player* peek(int position) const {
-        if (isEmpty() || position >= count) {
-            throw runtime_error("(!) Invalid position in CircularPlayersQueue");
-        }
-
-        Node* current = head;
-        for (int i = 0; i < position; i++) {
-            current = current->next;
-        }
-
-        return current->data;
-    }
-
-    bool isEmpty() const {
-        return head == nullptr;
-    }
-
-    int size() const {
-        return count;
-    }
-};    
-
 // function prototypes
 void loadPlayersToQueue(const string& filename, PlayersQueue& playerQueue);
 void displayPlayerQueue(PlayersQueue& playerQueue);

@@ -44,9 +44,17 @@ int getChoice(int max) {
 }
 
 int main() {
-    // Load players from CSV file
-    PlayersQueue allPlayersQueue;
-    loadPlayersToQueue("players.csv", allPlayersQueue);
+
+    // Simulate past tournaments and save results to history.txt
+    simulatePastTournament("players_allYears.csv", 2024);
+    //cout << "debug" << endl;
+    //cin.get();
+    simulatePastTournament("players_allYears.csv", 2023);
+    //cout << "debug" << endl;
+    //cin.get();
+
+    // Clear eliminated players list from previous tournaments
+    freePlayerQueue(eliminatedPlayers);
 
     // Initialize queues for players and matches
     PlayersQueue QF_winnersQueue;
@@ -55,6 +63,10 @@ int main() {
     MatchesQueue QFmatchesQueue;
     MatchesQueue RRmatchesQueue;
     MatchesQueue KOmatchesQueue;
+
+    // Load 2025 participants from CSV file
+    PlayersQueue allPlayersQueue;
+    loadPlayersToQueue("players_allYears.csv", allPlayersQueue, 2025);
 
     int choice;
     

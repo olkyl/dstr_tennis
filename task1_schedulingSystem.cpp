@@ -74,6 +74,33 @@ string generateMatchID(const string& matchType) {
     return matchType + to_string(globalMatchCounter); // Concatenate the match type with the counter to create a unique ID
 }
 
+// Function to simulate a match and determine the winner
+void generateScores(Match* match) {
+    if (match == nullptr || match->result != "NA") {
+        return; // Skip already completed matches or invalid matches
+    }
+    
+    // Seed the random number generator for each match
+    srand(time(nullptr)); // Add match pointer for more randomness
+    
+    // Generate tennis scores (15, 30, 45, 60)
+    match->score1 = (rand() % 4) * 15 + 15;  
+    match->score2 = (rand() % 4) * 15 + 15;
+    
+    // If scores are tied, regenerate one of them until they're different
+    while (match->score1 == match->score2) {
+        match->score1 = (rand() % 4) * 15 + 15;  
+        match->score2 = (rand() % 4) * 15 + 15;
+    }
+    
+    // Set the winner based on the scores
+    if (match->score1 > match->score2) {
+        match->result = match->player1;
+    } else {
+        match->result = match->player2;
+    }
+}
+
 // Function to free memory allocated for all matches in the queue
 void freeMatchesQueue(MatchesQueue& matchesQueue) {
     while (!matchesQueue.isEmpty()) {
@@ -127,7 +154,7 @@ void displayMatches(MatchesQueue& matchesQueue) {
 // Function to create Qualifying Matches (QF)
 // Input: playerQueue containing all players, matchQueue to store created matches
 // Output: None, just populate matchQueue with new matches
-void createMatches_QF(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
+void createMatches_QF(PlayersQueue& playerQueue, MatchesQueue& matchQueue, int year) {
     if (playerQueue.isEmpty() || playerQueue.size() < 48) {
         cout << "(!) Need exactly 48 players to create Qualifying Matches." << endl;
         return;
@@ -137,7 +164,7 @@ void createMatches_QF(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
     PlayersQueue original_lineup;
     
     // Set the default QF matches information
-    string startDate = "2025-05-25"; // First day of the QF round
+    string startDate = to_string(year) + "-05-25"; // First day of the QF round
     string startTime = "09:00";     // First match will start at 9 AM
     int matchDuration = 45;         // Each match will last 45 minutes
     string currentDate = startDate; // To track the date as matches are created
@@ -148,7 +175,16 @@ void createMatches_QF(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
     // Create matches until playerQueue has no more players
     while (playerQueue.size() >= 2) {
         // Get the first two players
+        if (!playerQueue.isEmpty()) {
+            Player* nextPlayer = playerQueue.peek();
+            cout << "Next player to be matched: " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
+        }
         Player* player1 = playerQueue.dequeue();
+        
+        if (!playerQueue.isEmpty()) {
+            Player* nextPlayer = playerQueue.peek();
+            cout << "Next player to be matched: " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
+        }
         Player* player2 = playerQueue.dequeue();
         
         // Store copies of the players in the backup queue
@@ -217,21 +253,7 @@ void getResults_QF(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     // Process each match
     while (!matchQueue.isEmpty()) {
         Match* match = matchQueue.dequeue();
-        if (match->result == "NA") {
-               // Generate tennis scores (15, 30, 40, 60) for each player
-               match->score1 = rand() % 4 * 15 + 15;  
-               match->score2 = rand() % 4 * 15 + 15;
-            
-            // Set the result (winner) based on the scores
-            if (match->score1 > match->score2) {
-                match->result = match->player1;
-            } else if (match->score1 < match->score2) {
-                match->result = match->player2;
-            } else {
-                // If the scores tie, randomly choose a winner
-                match->result = (rand() % 2 == 0) ? match->player1 : match->player2;
-            }
-        }
+        generateScores(match); // Simulate the match and determine the winner
 
         // Extract winner and loser IDs for this match
         string winnerID = match->result;
@@ -284,14 +306,14 @@ void getResults_QF(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
 // Function to create Round Robin Matches (RR)
 // Input: playerQueue containing all players, matchQueue to store created matches
 // Output: Populate matchQueue with new matches
-void createMatches_RR(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
+void createMatches_RR(PlayersQueue& playerQueue, MatchesQueue& matchQueue, int year) {
     if (playerQueue.isEmpty() || playerQueue.size() < 24) {
         cout << "(!) Need exactly 24 players for round robin matches." << endl;
         return;
     }
     
     // Set the default RR matches information
-    string startDate = "2025-05-30";    // First day of the RR round
+    string startDate = to_string(year) + "-05-30";   // First day of the RR round
     string startTime = "08:00";    // First match will start at 8 AM
     const int matchDuration = 60;   // Each match will last 60 minutes
     string currentDate = startDate;     // To track the date as matches are created
@@ -302,15 +324,21 @@ void createMatches_RR(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
     int playerCount = 0;
 
     // Create groups using circular queue 
-    CircularPlayersQueue groups[6];
+    PlayersQueue groups[6];
 
     // Distribute players into the 6 groups (4 players per group)
     for (int groupNum = 0; groupNum < 6; groupNum++) {
         for (int i = 0; i < 4; i++) {
             try {
+                // Preview the next player to be assigned to a group
+                if (!playerQueue.isEmpty()) {
+                    Player* nextPlayer = playerQueue.peek();
+                    cout << "Assigning player to Group " << (groupNum + 1) << ": " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
+                }
+
                 Player* player = playerQueue.dequeue();            // Get next player
                 original_lineup[playerCount++] = player;            // Store player to placeholder queue
-                groups[groupNum].enqueue(player);                  // Add player to current group
+                groups[groupNum].enqueue(player, rand() % 100 + 1);   // Add player to current group with RANDOM priority
             } catch (const runtime_error& e) {
                 cout << e.what() << endl;
                 // If failed halfway, make sure to restore any players who were already dequeued
@@ -324,16 +352,26 @@ void createMatches_RR(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
 
     // Create matches - ensure all players face each other within each group
     for (int groupNum = 0; groupNum < 6; groupNum++) {
+        // Create a temporary array to hold players from this group
+        Player* groupPlayers[4];
+        int groupPlayerCount = 0;
+        
+        // Extract all players from this group's queue
+        while (!groups[groupNum].isEmpty() && groupPlayerCount < 4) {
+            groupPlayers[groupPlayerCount++] = groups[groupNum].dequeue();
+        }
+        
         cout << "\nRound Robin Group " << (groupNum + 1) << "\nPlayers: | ";
-        for (int i = 0; i < 4; i++) { // Display each player in the group
-            cout << groups[groupNum].peek(i)->playerID << " | ";
+        for (int i = 0; i < groupPlayerCount; i++) {
+            cout << groupPlayers[i]->playerID << " | ";
         }
         cout << "\nUpcoming matches:" << endl;
 
-        for (int i = 0; i < 3; i++) {  // First player index (0 to 2)
-            for (int j = i + 1; j < 4; j++) {  // Second player index (i+1 to 3)
-                Player* p1 = groups[groupNum].peek(i);
-                Player* p2 = groups[groupNum].peek(j);
+        // Create matches between all pairs of players in this group
+        for (int i = 0; i < groupPlayerCount - 1; i++) {
+            for (int j = i + 1; j < groupPlayerCount; j++) {
+                Player* p1 = groupPlayers[i];
+                Player* p2 = groupPlayers[j];
 
                 // Create a new match for each pair
                 Match* newMatch = new Match();
@@ -393,19 +431,7 @@ void getResults_RR(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     // Process all matches
     while (!matchQueue.isEmpty()) {
         Match* match = matchQueue.dequeue();
-
-        // Generate tennis scores (15, 30, 40, 60) for each player
-        match->score1 = rand() % 4 * 15 + 15;  
-        match->score2 = rand() % 4 * 15 + 15;
-
-        // Determine winner based on score
-        if (match->score1 > match->score2) {
-            match->result = match->player1; // Player 1 wins
-        } else if (match->score1 < match->score2) {
-            match->result = match->player2; // Player 2 wins
-        } else {
-            match->result = (rand() % 2 == 0) ? match->player1 : match->player2; // Random selection for tiebreaker
-        }
+        generateScores(match); // Simulate the match and determine the winner
 
         // Store ID and achieved score into the array
         bool found1 = false, found2 = false; // Flags to check if players are already in the arrays
@@ -475,8 +501,7 @@ void getResults_RR(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
                     // Winner advances to the next stage
                     winner = player;
                     winnersQueue.enqueue(player, player->rank);
-                    cout << "(*) Group " << (g + 1) << " winner: " << player->playerName 
-                         << " (" << player->playerID << ") " << endl;
+                    cout << "(*) Group " << (g + 1) << " winner: " << player->playerName << " (" << player->playerID << ") " << endl;
                 } else {
                     // This player is eliminated
                     Player* eliminatedPlayer = new Player(*player);
@@ -503,7 +528,7 @@ void getResults_RR(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
 // Function to create Knockout Matches (KO)
 // Input: playerQueue containing all players, matchQueue to store created matches
 // Output: NPopulate matchQueue with new matches
-void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
+void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue, int year) {
     if (playerQueue.isEmpty() || playerQueue.size() < 6) {
         cout << "(!) Need exactly 6 players to create Knockout Rounds." << endl;
         return;
@@ -513,7 +538,7 @@ void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
     PlayersQueue original_lineup;
     
     // Set the default KO matches information
-    string startDate = "2025-06-07"; // First day of the KO round
+    string startDate = to_string(year) + "-06-07"; // First day of the KO round
     string startTime = "09:00";     // First match will start at 9 AM
     int matchDuration = 45;         // Each match will last 45 minutes
     string currentDate = startDate; // To track the date as matches are created
@@ -522,7 +547,16 @@ void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
     int matchesCreated = 0;
 
     // Get the top 2 players from the queue -- directly wait at semi-finals bracket
+    if (!playerQueue.isEmpty()) {
+        Player* nextPlayer = playerQueue.peek();
+        cout << "First semi-finalist: " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
+    }
     Player* semiFinalist1 = playerQueue.dequeue();  
+
+    if (!playerQueue.isEmpty()) {
+        Player* nextPlayer = playerQueue.peek();
+        cout << "Second semi-finalist: " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
+    }
     Player* semiFinalist2 = playerQueue.dequeue(); 
 
     // Store these players in the placeholder queue
@@ -533,6 +567,10 @@ void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue) {
     Player* knockoutPlayers[4];
 
     for (int i = 0; i < 4 && !playerQueue.isEmpty(); i++) {
+        if (!playerQueue.isEmpty()) {
+            Player* nextPlayer = playerQueue.peek();
+            cout << "Quarterfinal player " << (i+1) << ": " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
+        }
         knockoutPlayers[i] = playerQueue.dequeue();
         original_lineup.enqueue(knockoutPlayers[i], knockoutPlayers[i]->rank);
     }
@@ -674,49 +712,37 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     };
     
     // Lambda function to simulate match and determine winner
-    auto simulateMatch = [&](Match* match, string& winner) {
+    auto getWinner = [&](Match* match, string& winner) {
         // Skip invalid matches
         if (!match || match->player1 == "NA" || match->player2 == "NA") return;
         
-        // Only simulate if match hasn't been played yet
-        if (match->result == "NA") {
-            // Generate tennis scores (15, 30, 45, 60)
-            match->score1 = rand() % 4 * 15 + 15;  
-            match->score2 = rand() % 4 * 15 + 15;
-            
-            // Handle tie-breaker if needed
-            if (match->score1 == match->score2)
-                match->result = (rand() % 2) ? match->player1 : match->player2;  // Random winner for ties
-            else
-                match->result = (match->score1 > match->score2) ? match->player1 : match->player2;  // Higher score wins
-        }
-        
-        // Store winner ID and add loser to eliminated players
-        winner = match->result;
+        generateScores(match);
+
+        // Store winner ID and add loser to eliminated players queue
+        winner = match->result; 
         eliminatePlayer((match->result == match->player1) ? match->player2 : match->player1); 
     };
     
     // Simulate quarterfinal matches
     for (int i = 0; i < qf_index; i++) {
-        simulateMatch(qf[i], qfWin[i]);
+        getWinner(qf[i], qfWin[i]);
     }
     
     // Simulate semifinal matches with quarterfinal winners
     for (int i = 0; i < sf_index; i++) {
         // Update semifinal bracket with quarterfinal winner
         if (sf[i]->player2 == "NA") sf[i]->player2 = qfWin[i];
-        simulateMatch(sf[i], sfWin[i]);  // Simulate match
+        getWinner(sf[i], sfWin[i]);  // Simulate match
     }
     
     // Simulate final match with semifinal winners
     if (final) {
         final->player1 = sfWin[0];  // First finalist
         final->player2 = sfWin[1];  // Second finalist
-        simulateMatch(final, champion);  // Determine champion
+        getWinner(final, champion);  // Determine champion
     }
     
     // Display tournament results
-    cout << "\n=== Knockout Tournament Results ===" << endl;
     displayMatches(matchQueue);
     
     // Record tournament champion in winners queue
@@ -732,8 +758,7 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
                 winnersQueue.enqueue(champ, 1);  // Add to winners queue
                 
                 // Display champion information
-                cout << "\nTOURNAMENT CHAMPION: " << player->playerName 
-                     << " (" << player->playerID << ") from " << player->school << endl;
+                cout << "\nTOURNAMENT CHAMPION: " << player->playerName << " (" << player->playerID << ") from " << player->school << endl;
             }
             playersPlaceholder.enqueue(player, player->rank);  // Preserve player in temp queue
         }
@@ -743,4 +768,80 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     }
     
     cout << "(*) Tournament is completed!" << endl;
+}
+
+// Function to simulate an entire tournament for a given year and write results to history.txt
+void simulatePastTournament(const string& csv_filename, int year) {
+    // Load players for the specific year
+    PlayersQueue allPlayersQueue;
+    loadPlayersToQueue(csv_filename, allPlayersQueue, year);
+    
+    if (allPlayersQueue.size() < 48) {
+        cout << "(!) Not enough players for year " << year << ". Need exactly 48 players." << endl;
+        return;
+    }
+    
+    // Initialize queues for each tournament stage
+    PlayersQueue QF_winners;
+    PlayersQueue RR_winners;
+    PlayersQueue KO_winners;
+    MatchesQueue QFmatches;
+    MatchesQueue RRmatches;
+    MatchesQueue KOmatches;
+    
+    cout << "\n=== TOURNAMENT RECORDS FOR YEAR " << year << " ===" << endl;
+    
+    // Stage 1: Qualifying Rounds
+    cout << "\n------------ QUALIFYING ROUNDS" << endl;
+    createMatches_QF(allPlayersQueue, QFmatches, year);
+    getResults_QF(QFmatches, allPlayersQueue, QF_winners);
+    
+    // Stage 2: Round Robin
+    cout << "\n------------ ROUND ROBIN" << endl;
+    createMatches_RR(QF_winners, RRmatches, year);
+    getResults_RR(RRmatches, QF_winners, RR_winners);
+    
+    // Stage 3: Knockout
+    cout << "\n------------ KNOCKOUT STAGE" << endl;
+    createMatches_KO(RR_winners, KOmatches, year);
+    getResults_KO(KOmatches, RR_winners, KO_winners);
+    
+    // Open file to write tournament history
+    ofstream historyFile;
+    historyFile.open("history.txt", ios::app); // Append mode
+    
+    if (historyFile.is_open()) {
+        // Write KO matches to file in simple CSV format
+        if (!KOmatches.isEmpty()) {
+            // Create a temporary queue
+            MatchesQueue tempQueue;
+            
+            // Write all matches by dequeuing and re-enqueuing
+            while (!KOmatches.isEmpty()) {
+                Match* match = KOmatches.dequeue();
+                
+                // Write match data in simple comma-separated format
+                historyFile << match->matchID << "," 
+                          << match->date << "," 
+                          << match->startTime << "," 
+                          << match->player1 << "," 
+                          << match->player2 << "," 
+                          << match->result << "," 
+                          << match->score1 << "," 
+                          << match->score2 << "\n";
+                
+                tempQueue.enqueue(match);
+            }
+            
+            // Restore original queue
+            while (!tempQueue.isEmpty()) {
+                KOmatches.enqueue(tempQueue.dequeue());
+            }
+        }
+        
+        historyFile.close();
+        cout << "(*) Tournament history for year " << year << " saved to history.txt" << endl;
+    } else {
+        cout << "(!) Failed to open history.txt for writing." << endl;
+    }
 }

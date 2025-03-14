@@ -100,13 +100,15 @@ public:
 string getNextDate(const string& date);
 string incrementTime(const string& time, int minutesToAdd);
 string generateMatchID(const string& matchType);
+void generateScores(Match* match);
 void freeMatchesQueue(MatchesQueue& matchesQueue);
 void displayMatches(MatchesQueue& matchesQueue);
-void createMatches_QF(PlayersQueue& playerQueue, MatchesQueue& matchQueue);
+void createMatches_QF(PlayersQueue& playerQueue, MatchesQueue& matchQueue, int year);
 void getResults_QF(MatchesQueue& matchQueue, PlayersQueue& playersQueue, PlayersQueue& winnersQueue);
-void createMatches_RR(PlayersQueue& qualifiedPlayers, MatchesQueue& matchQueue);
+void createMatches_RR(PlayersQueue& qualifiedPlayers, MatchesQueue& matchQueue, int year);
 void getResults_RR(MatchesQueue& matchQueue, PlayersQueue& playersQueue, PlayersQueue& winnersQueue);
-void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue);
+void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue, int year);
 void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, PlayersQueue& winnersQueue);
+void simulatePastTournament(const string& csv_filename, int year) ;
 
 #endif // SCHEDULING_SYSTEM_HPP

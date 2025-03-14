@@ -13,9 +13,9 @@ extern void clearScreen();
 extern int getChoice(int max);
 
 // Defined in task1_schedulingSystem.cpp
-extern void createMatches_QF(PlayersQueue& allPlayersQueue, MatchesQueue& QFmatchesQueue);
-extern void createMatches_RR(PlayersQueue& QF_winnersQueue, MatchesQueue& RRmatchesQueue);
-extern void createMatches_KO(PlayersQueue& RR_winnersQueue, MatchesQueue& KOmatchesQueue);
+extern void createMatches_QF(PlayersQueue& allPlayersQueue, MatchesQueue& QFmatchesQueue, int year);
+extern void createMatches_RR(PlayersQueue& QF_winnersQueue, MatchesQueue& RRmatchesQueue, int year);    
+extern void createMatches_KO(PlayersQueue& RR_winnersQueue, MatchesQueue& KOmatchesQueue, int year);
 
 void display_SchedulingMenu() {
     clearScreen();
@@ -70,7 +70,7 @@ void handleMatchScheduling(
             } else if (!QFmatchesQueue.isEmpty()) {
                 cout << "Qualifying Matches (QF) have already been created." << endl;
             } else {
-                createMatches_QF(allPlayersQueue, QFmatchesQueue);
+                createMatches_QF(allPlayersQueue, QFmatchesQueue, 2025);
             }
             break;
         
@@ -83,20 +83,31 @@ void handleMatchScheduling(
             break;
         
         case 3: // See QF Match Results
-            while (!QF_winnersQueue.isEmpty()) {
-                QF_winnersQueue.dequeue();
+            if (QFmatchesQueue.isEmpty()) {
+                cout << "(!) No qualifying matches to generate results for." << endl;
+            } else if (QF_resultsGenerated) {
+                cout << "(!) Qualifying match results have already been generated." << endl;
+                displayMatches(QFmatchesQueue);
+            } else {
+                while (!QF_winnersQueue.isEmpty()) {
+                    QF_winnersQueue.dequeue();
+                }
+                getResults_QF(QFmatchesQueue, allPlayersQueue, QF_winnersQueue);
+                QF_resultsGenerated = true;  // Set flag once results are generated
             }
-            getResults_QF(QFmatchesQueue, allPlayersQueue, QF_winnersQueue);
-            QF_resultsGenerated = true;  // Set flag once results are generated
             break;
         
         case 4: // Create Round Robin Matches
-            if (RR_resultsGenerated) {
+            if (!QF_resultsGenerated) {
+                cout << "(!) Must generate Qualifying match results before creating Round Robin matches." << endl;
+            } else if (RR_resultsGenerated) {
                 cout << "(!) Cannot create new Round Robin Matches after results have been generated." << endl;
             } else if (!RRmatchesQueue.isEmpty()) {
                 cout << "Round Robin Matches (RR) have already been created." << endl;
+            } else if (QF_winnersQueue.isEmpty() || QF_winnersQueue.size() < 24) {
+                cout << "(!) Not enough qualified players for Round Robin. Need 24 players." << endl;
             } else {
-                createMatches_RR(QF_winnersQueue, RRmatchesQueue);
+                createMatches_RR(QF_winnersQueue, RRmatchesQueue, 2025);
             }
             break;
         
@@ -109,20 +120,33 @@ void handleMatchScheduling(
             break;
         
         case 6: // See RR Match Results
-            while (!RR_winnersQueue.isEmpty()) {
-                RR_winnersQueue.dequeue();
+            if (!QF_resultsGenerated) {
+                cout << "(!) Must generate Qualifying match results first." << endl;
+            } else if (RRmatchesQueue.isEmpty()) {
+                cout << "(!) No round robin matches to generate results for." << endl;
+            } else if (RR_resultsGenerated) {
+                cout << "(!) Round Robin match results have already been generated." << endl;
+                displayMatches(RRmatchesQueue);
+            } else {
+                while (!RR_winnersQueue.isEmpty()) {
+                    RR_winnersQueue.dequeue();
+                }
+                getResults_RR(RRmatchesQueue, QF_winnersQueue, RR_winnersQueue);
+                RR_resultsGenerated = true;  // Set flag once results are generated
             }
-            getResults_RR(RRmatchesQueue, QF_winnersQueue, RR_winnersQueue);
-            RR_resultsGenerated = true;  // Set flag once results are generated
             break;
         
         case 7: // Create Knockout Matches
-            if (KO_resultsGenerated) {
+            if (!RR_resultsGenerated) {
+                cout << "(!) Must generate Round Robin match results before creating Knockout matches." << endl;
+            } else if (KO_resultsGenerated) {
                 cout << "(!) Cannot create new Knockout Matches after results have been generated." << endl;
             } else if (!KOmatchesQueue.isEmpty()) {
                 cout << "Knockout Matches (KO) have already been created." << endl;
+            } else if (RR_winnersQueue.isEmpty() || RR_winnersQueue.size() < 6) {
+                cout << "(!) Not enough qualified players for Knockout. Need 6 players." << endl;
             } else {
-                createMatches_KO(RR_winnersQueue, KOmatchesQueue);
+                createMatches_KO(RR_winnersQueue, KOmatchesQueue, 2025);
             }
             break;
         
@@ -135,8 +159,20 @@ void handleMatchScheduling(
             break;
         
         case 9: // See KO Match Results
-            getResults_KO(KOmatchesQueue, RR_winnersQueue, KO_winnersQueue);
-            KO_resultsGenerated = true;  // Set flag once results are generated
+            if (!RR_resultsGenerated) {
+                cout << "(!) Must generate Round Robin match results first." << endl;
+            } else if (KOmatchesQueue.isEmpty()) {
+                cout << "(!) No knockout matches to generate results for." << endl;
+            } else if (KO_resultsGenerated) {
+                cout << "(!) Knockout match results have already been generated." << endl;
+                displayMatches(KOmatchesQueue);
+            } else {
+                while (!KO_winnersQueue.isEmpty()) {
+                    KO_winnersQueue.dequeue();
+                }
+                getResults_KO(KOmatchesQueue, RR_winnersQueue, KO_winnersQueue);
+                KO_resultsGenerated = true;  // Set flag once results are generated
+            }
             break;
         
         case 0: // Return
