@@ -47,11 +47,11 @@ int main() {
 
     // Simulate past tournaments and save results to history.txt
     simulatePastTournament("players_allYears.csv", 2024);
-    //cout << "debug" << endl;
-    //cin.get();
+    cout << "debug" << endl;
+    cin.get();
     simulatePastTournament("players_allYears.csv", 2023);
-    //cout << "debug" << endl;
-    //cin.get();
+    cout << "debug" << endl;
+    cin.get();
 
     // Clear eliminated players list from previous tournaments
     freePlayerQueue(eliminatedPlayers);
