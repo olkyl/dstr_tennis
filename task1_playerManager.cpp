@@ -3,7 +3,7 @@
 #include "task1_playerManager.hpp"
 
 // Function to load players from CSV file directly into a queue
-void loadPlayersToQueue(const string& filename, PlayersQueue& playerQueue) {
+void loadPlayersToQueue(const string& filename, PlayersQueue& playerQueue, int targetYear) {
     ifstream file(filename);
     if (!file.is_open()) {
         cout << "(!) Error: Could not open file " << filename << endl;
@@ -18,6 +18,8 @@ void loadPlayersToQueue(const string& filename, PlayersQueue& playerQueue) {
     }
     
     string line;
+    int playerCount = 0;
+
     while (getline(file, line)) {
         stringstream ss(line);
         string token;
@@ -43,10 +45,22 @@ void loadPlayersToQueue(const string& filename, PlayersQueue& playerQueue) {
         // Parse rank
         getline(ss, token, ',');
         newPlayer->rank = stoi(token);
+
+        // Parse year 
+        int year = 0;
+        if (getline(ss, token, ',')) {
+            year = stoi(token);
+        }
         
         newPlayer->next = nullptr;
         
-        playerQueue.enqueue(newPlayer); // Add to queue using rank as priority
+        // Only add the player if they match the target year
+        if (year == targetYear) {
+            playerQueue.enqueue(newPlayer); // Add to queue using rank as priority
+            playerCount++;
+        } else {
+            delete newPlayer; // Skip this player (not from the target year)
+        }
     }
     
     file.close();

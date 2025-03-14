@@ -101,7 +101,7 @@ public:
 };
    
 // function prototypes
-void loadPlayersToQueue(const string& filename, PlayersQueue& playerQueue);
+void loadPlayersToQueue(const string& filename, PlayersQueue& playerQueue, int targetYear);
 void displayPlayerQueue(PlayersQueue& playerQueue);
 void freePlayerQueue(PlayersQueue& playerQueue);
 
