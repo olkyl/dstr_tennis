@@ -58,15 +58,15 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
         return;
     }
 
-    // ✅ Step 1: Check if this year's data already exists (Match ID Prefix Check)
+    // ✅ Step 1: Check if this year already exists in `history.txt`
     bool yearExists = false;
-    string yearPrefix = "KO" + to_string((year - 2021) * 65 + 61); // Match ID prefix
-
     ifstream checkFile("history.txt");
+    string yearStr = to_string(year);  // Convert year to string
+
     if (checkFile.is_open()) {
         string line;
         while (getline(checkFile, line)) {
-            if (line.find(yearPrefix) == 0) {  // ✅ Check if match ID prefix already exists
+            if (line.find(yearStr) != string::npos) {  // ✅ Check if the year is already in history
                 yearExists = true;
                 break;
             }
@@ -76,7 +76,7 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
 
     if (yearExists) {
         cout << "(!) Tournament data for year " << year << " already exists in history.txt. Skipping storage.\n";
-        return;  // ✅ If year exists, DO NOT save duplicate results
+        return;  // ✅ Prevents duplicate storage
     }
 
     // ✅ Step 2: Prepare new history entry
@@ -86,14 +86,14 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
     historyEntry << "No. | Match ID | Date       | Time  | Player 1  | Player 2  | Result\n";
     historyEntry << "--------------------------------------------------\n";
 
-    // ✅ Step 3: Write KO matches in structured table format
+    // ✅ Step 3: Write KO matches in structured format
     MatchesQueue tempQueue;
     int count = 1;
     while (!KOmatchesQueue.isEmpty()) {
         Match* match = KOmatchesQueue.dequeue();
 
-        historyEntry << match->matchID << "  | "  // ✅ Match ID first to prevent duplication
-                     << count << "   | "
+        historyEntry << count << "   | "  // ✅ Match Number
+                     << match->matchID << " | " 
                      << match->date << " | " 
                      << match->startTime << " | "
                      << match->player1 << " | "
