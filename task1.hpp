@@ -35,6 +35,8 @@ void handleMatchScheduling(
     MatchesQueue& KOmatchesQueue
 );
 
+int getValidYear();
+
 // Display all players who won/advanced through each round and the eliminated players
 void handlePlayerProgressionView(
     PlayersQueue& allPlayersQueue, 

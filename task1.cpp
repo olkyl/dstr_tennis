@@ -53,7 +53,8 @@ void handleMatchScheduling(
     PlayersQueue& KO_winnersQueue, 
     MatchesQueue& QFmatchesQueue, 
     MatchesQueue& RRmatchesQueue, 
-    MatchesQueue& KOmatchesQueue
+    MatchesQueue& KOmatchesQueue,
+    int tournamentYear
 ) {
     // Static flags to track if results have been determined
     static bool QF_resultsGenerated = false;
@@ -70,7 +71,7 @@ void handleMatchScheduling(
             } else if (!QFmatchesQueue.isEmpty()) {
                 cout << "Qualifying Matches (QF) have already been created." << endl;
             } else {
-                createMatches_QF(allPlayersQueue, QFmatchesQueue, 2025);
+                createMatches_QF(allPlayersQueue, QFmatchesQueue, tournamentYear);
             }
             break;
         
@@ -107,7 +108,7 @@ void handleMatchScheduling(
             } else if (QF_winnersQueue.isEmpty() || QF_winnersQueue.size() < 24) {
                 cout << "(!) Not enough qualified players for Round Robin. Need 24 players." << endl;
             } else {
-                createMatches_RR(QF_winnersQueue, RRmatchesQueue, 2025);
+                createMatches_RR(QF_winnersQueue, RRmatchesQueue, tournamentYear);
             }
             break;
         
@@ -146,7 +147,7 @@ void handleMatchScheduling(
             } else if (RR_winnersQueue.isEmpty() || RR_winnersQueue.size() < 6) {
                 cout << "(!) Not enough qualified players for Knockout. Need 6 players." << endl;
             } else {
-                createMatches_KO(RR_winnersQueue, KOmatchesQueue, 2025);
+                createMatches_KO(RR_winnersQueue, KOmatchesQueue, tournamentYear);
             }
             break;
         
@@ -208,6 +209,27 @@ void handlePlayerProgressionView(
     }
 }
 
+// Function to get valid year input from user
+int getValidYear() {
+    int year;
+    do {
+        cout << "Enter year for the tournament: ";
+        cin >> year;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "(!) Invalid input. Please enter a numeric value." << endl;
+            continue;
+        }
+        if (year <= 2024) {
+            cout << "(!) Year must be greater than 2024." << endl;
+            continue;
+        }
+        break;
+    } while (true);
+    return year;
+}
+
 // Allow admin to choose between Task 1 actions
 void handleTournamentScheduling(
     PlayersQueue& allPlayersQueue, 
@@ -219,12 +241,25 @@ void handleTournamentScheduling(
     MatchesQueue& KOmatchesQueue
 ) {
     int option;
+    bool yearInput = false;  // Flag to track if year has been input
+    int tournamentYear = 0;  // Variable to store the tournament year
+    
     do {
         display_SchedulingMenu();
         option = getChoice(2);
 
         switch (option) {
             case 1: // Schedule Matches
+                // Ask for year input only once
+                if (!yearInput) {
+                    tournamentYear = getValidYear();
+                    yearInput = true;
+                    cout << "Tournament year set to: " << tournamentYear << endl;
+                    cout << "Press Enter to continue...";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cin.get();
+                }
+                
                 handleMatchScheduling(
                     allPlayersQueue, 
                     QF_winnersQueue, 
@@ -232,7 +267,8 @@ void handleTournamentScheduling(
                     KO_winnersQueue, 
                     QFmatchesQueue, 
                     RRmatchesQueue, 
-                    KOmatchesQueue
+                    KOmatchesQueue,
+                    tournamentYear
                 );
                 break;
             
