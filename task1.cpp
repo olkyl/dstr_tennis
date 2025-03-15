@@ -234,6 +234,75 @@ int getValidYear() {
             cout << "(!) Year must be greater than 2024." << endl;
             continue;
         }
+        
+        // Check if tournament data for this year already exists in history.txt
+        bool yearExists = false;
+        string yearString = to_string(year); // String to search for year
+        
+        ifstream checkFile("history.txt");
+        if (checkFile.is_open()) {
+            string line;
+            while (getline(checkFile, line)) {
+                // Look for lines that start with "Year: " followed by the year
+                if (line.find("Year: " + yearString) != string::npos) {
+                    yearExists = true;
+                    break;
+                }
+            }
+            checkFile.close();
+        }
+        
+        if (yearExists) {
+            cout << "(!) Tournament data for year " << year << " already exists." << endl;
+            cout << "(!) Please choose a different year." << endl;
+            continue;
+        }
+        
+        // Check if any players have registered for this year
+        bool hasPlayers = false;
+        ifstream playersFile("players_allYears.csv");
+        if (playersFile.is_open()) {
+            string line;
+            
+            // Check for BOM and skip if present
+            char bom[3];
+            playersFile.read(bom, 3);
+            if (!(bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF)) {
+                playersFile.seekg(0); // If no BOM, reset file pointer to beginning
+            }
+            
+            while (getline(playersFile, line)) {
+                stringstream ss(line);
+                string token;
+                
+                // Skip to the year field (6th column)
+                for (int i = 0; i < 5; i++) {
+                    getline(ss, token, ',');
+                }
+                
+                // Parse year 
+                int fileYear = 0;
+                if (getline(ss, token, ',')) {
+                    try {
+                        fileYear = stoi(token);
+                        if (fileYear == year) {
+                            hasPlayers = true;
+                            break;
+                        }
+                    } catch (...) {
+                        // Skip any lines with invalid year format
+                    }
+                }
+            }
+            playersFile.close();
+        }
+        
+        if (!hasPlayers) {
+            cout << "(!) No registration has opened for year " << year << ", cannot schedule matches." << endl;
+            cout << "(!) Please choose a different year." << endl;
+            continue;
+        }
+        
         break;
     } while (true);
     return year;

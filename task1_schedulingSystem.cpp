@@ -808,28 +808,20 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
 void simulatePastTournament(const string& csv_filename, int year) {
     // Check if data from a specific year already exists
     bool yearExists = false;
-    string yearString = to_string(year); // String to search for year (example: "2022")
-    
-    ifstream checkFile("history.txt");
-    if (checkFile.is_open()) {
-        string line;
-        while (getline(checkFile, line)) {
-            // Check if the line contains the year string in the date field (second column)
-            size_t firstComma = line.find(',');
-            if (firstComma != string::npos) {
-                size_t secondComma = line.find(',', firstComma + 1);
-                if (secondComma != string::npos) {
-                    // Extract the date field
-                    string date = line.substr(firstComma + 1, secondComma - firstComma - 1);
-                    if (date.find(yearString) == 0) {
-                        yearExists = true;
-                        break;
-                    }
+        string yearString = to_string(year); // String to search for year
+        
+        ifstream checkFile("history.txt");
+        if (checkFile.is_open()) {
+            string line;
+            while (getline(checkFile, line)) {
+                // Look for lines that start with "Year: " followed by the year
+                if (line.find("Year: " + yearString) != string::npos) {
+                    yearExists = true;
+                    break;
                 }
             }
+            checkFile.close();
         }
-        checkFile.close();
-    }
 
     if (yearExists) {
         cout << "(!) Tournament data for year " << year << " already exists in history.txt." << endl;
@@ -873,15 +865,15 @@ void simulatePastTournament(const string& csv_filename, int year) {
     if (historyFile.is_open()) {
         // Set up the header for the tournament history
         historyFile << "\nYear: " << year << "\n";
-        historyFile << "-------------------------------------------------------------------\n";
+        historyFile << "---------------------------------------------------------------------------------\n";
         historyFile << "| " << setw(8) << "No. " << " | " 
-                    << setw(4) << "Match ID" << " | " 
+                    << setw(8) << "Match ID" << " | " 
                     << setw(10) << "Date" << " | " 
                     << setw(7) << "Time" << " | " 
                     << setw(9) << "Player 1" << " | " 
                     << setw(9) << "Player 2" << " | " 
                     << setw(8) << "Result" << " |\n";
-        historyFile << "-------------------------------------------------------------------\n";
+        historyFile << "---------------------------------------------------------------------------------\n";
 
         // Write the matches' details in structured table format
         MatchesQueue tempQueue;
@@ -890,7 +882,7 @@ void simulatePastTournament(const string& csv_filename, int year) {
             Match* match = KOmatches.dequeue();
 
             historyFile << "| " << setw(8) << match->matchID << " | " 
-                        << setw(4) << count << " | "
+                        << setw(8) << count << " | "
                         << setw(10) << match->date << " | " 
                         << setw(7) << match->startTime << " | " 
                         << setw(9) << match->player1 << " | " 
@@ -900,7 +892,7 @@ void simulatePastTournament(const string& csv_filename, int year) {
             tempQueue.enqueue(match);
             count++;
         }
-        historyFile << "-------------------------------------------------------------------\n";
+        historyFile << "---------------------------------------------------------------------------------\n";
 
         // Restore original queue
         while (!tempQueue.isEmpty()) {

@@ -82,9 +82,15 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
     // ✅ Step 2: Prepare new history entry
     stringstream historyEntry;
     historyEntry << "\nYear: " << year << "\n";
-    historyEntry << "--------------------------------------------------\n";
-    historyEntry << "No. | Match ID | Date       | Time  | Player 1  | Player 2  | Result\n";
-    historyEntry << "--------------------------------------------------\n";
+    historyEntry << "---------------------------------------------------------------------------------\n";
+    historyEntry << "| " << setw(8) << "No. " << " | " 
+                << setw(8) << "Match ID" << " | " 
+                << setw(10) << "Date" << " | " 
+                << setw(7) << "Time" << " | " 
+                << setw(9) << "Player 1" << " | " 
+                << setw(9) << "Player 2" << " | " 
+                << setw(8) << "Result" << " |\n";
+    historyEntry << "---------------------------------------------------------------------------------\n";
 
     // ✅ Step 3: Write KO matches in structured format
     MatchesQueue tempQueue;
@@ -92,17 +98,18 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
     while (!KOmatchesQueue.isEmpty()) {
         Match* match = KOmatchesQueue.dequeue();
 
-        historyEntry << count << "   | "  // ✅ Match Number
-                     << match->matchID << " | " 
-                     << match->date << " | " 
-                     << match->startTime << " | "
-                     << match->player1 << " | "
-                     << match->player2 << " | "
-                     << match->result << "\n";
+        historyEntry << "| " << setw(8) << match->matchID << " | " 
+                    << setw(8) << count << " | "
+                    << setw(10) << match->date << " | " 
+                    << setw(7) << match->startTime << " | " 
+                    << setw(9) << match->player1 << " | " 
+                    << setw(9) << match->player2 << " | " 
+                    << setw(8) << match->result << " |\n";
 
         tempQueue.enqueue(match);
         count++;
     }
+    historyEntry << "---------------------------------------------------------------------------------\n";
 
     // Restore original queue
     while (!tempQueue.isEmpty()) {
