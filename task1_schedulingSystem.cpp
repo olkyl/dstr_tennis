@@ -1,6 +1,7 @@
 #include "allStructs.hpp"
 #include "task1_schedulingSystem.hpp"
 #include "task1_playerManager.hpp"
+#include <limits>
 
 using namespace std;
 
@@ -175,16 +176,7 @@ void createMatches_QF(PlayersQueue& playerQueue, MatchesQueue& matchQueue, int y
     // Create matches until playerQueue has no more players
     while (playerQueue.size() >= 2) {
         // Get the first two players
-        if (!playerQueue.isEmpty()) {
-            Player* nextPlayer = playerQueue.peek();
-            cout << "Next player to be matched: " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
-        }
         Player* player1 = playerQueue.dequeue();
-        
-        if (!playerQueue.isEmpty()) {
-            Player* nextPlayer = playerQueue.peek();
-            cout << "Next player to be matched: " << nextPlayer->playerName << " (" << nextPlayer->playerID << ")" << endl;
-        }
         Player* player2 = playerQueue.dequeue();
         
         // Store copies of the players in the backup queue
@@ -295,7 +287,27 @@ void getResults_QF(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
         matchesPlaceholder.enqueue(match);
     }
 
-    displayMatches(matchesPlaceholder); // Display all matches with results
+    // Peek at winnersQueue and print advancing players
+    string advancingPlayers = "";
+    PlayersQueue advancingPlaceholder;
+    
+    while (!winnersQueue.isEmpty()) {
+        Player* player = winnersQueue.dequeue();
+        
+        if (!advancingPlayers.empty()) {
+            advancingPlayers += ", ";
+        }
+        advancingPlayers += player->playerID;
+        
+        advancingPlaceholder.enqueue(player, player->rank);
+    }
+    
+    // Restore winnersQueue
+    while (!advancingPlaceholder.isEmpty()) {
+        winnersQueue.enqueue(advancingPlaceholder.dequeue());
+    }
+    
+    cout << "(*) Advancing players: " << advancingPlayers << endl;
 
     // Restore the matches to the original queue
     while (!matchesPlaceholder.isEmpty()) {
@@ -522,7 +534,32 @@ void getResults_RR(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
         matchQueue.enqueue(matchesPlaceholder.dequeue());
     }
 
-    displayMatches(matchQueue); // Display all matches with results
+    // Peek at winnersQueue and print advancing players
+    string advancingPlayers = "";
+    PlayersQueue advancingPlaceholder;
+    
+    while (!winnersQueue.isEmpty()) {
+        Player* player = winnersQueue.dequeue();
+        
+        if (!advancingPlayers.empty()) {
+            advancingPlayers += ", ";
+        }
+        advancingPlayers += player->playerID;
+        
+        advancingPlaceholder.enqueue(player, player->rank);
+    }
+    
+    // Restore winnersQueue
+    while (!advancingPlaceholder.isEmpty()) {
+        winnersQueue.enqueue(advancingPlaceholder.dequeue());
+    }
+    
+    cout << "(*) Advancing players: " << advancingPlayers << endl;
+
+    // Restore matches to original matchQueue
+    while (!matchesPlaceholder.isEmpty()) {
+        matchQueue.enqueue(matchesPlaceholder.dequeue());
+    }
 }
 
 // Function to create Knockout Matches (KO)
@@ -742,9 +779,6 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
         getWinner(final, champion);  // Determine champion
     }
     
-    // Display tournament results
-    displayMatches(matchQueue);
-    
     // Record tournament champion in winners queue
     if (!champion.empty()) {
         PlayersQueue playersPlaceholder;
@@ -772,15 +806,37 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
 
 // Function to simulate an entire tournament for a given year and write results to history.txt
 void simulatePastTournament(const string& csv_filename, int year) {
+    // Check if tournament data for this year already exists in history.txt
+    bool yearExists = false;
+    string yearPrefix = "KO" + to_string((year - 2021) * 65 + 61); // Calculate the expected match ID prefix
+    
+    ifstream checkFile("history.txt");
+    if (checkFile.is_open()) {
+        string line;
+        while (getline(checkFile, line)) {
+            // Check if the line starts with the match ID prefix for this year
+            if (line.find(yearPrefix) == 0) {
+                yearExists = true;
+                break;
+            }
+        }
+        checkFile.close();
+    }
+    
+    if (yearExists) {
+        cout << "(!) Tournament data for year " << year << " already exists in history.txt." << endl;
+        return;
+    }
+    
     // Load players for the specific year
     PlayersQueue allPlayersQueue;
     loadPlayersToQueue(csv_filename, allPlayersQueue, year);
-    
+
     if (allPlayersQueue.size() < 48) {
         cout << "(!) Not enough players for year " << year << ". Need exactly 48 players." << endl;
         return;
     }
-    
+
     // Initialize queues for each tournament stage
     PlayersQueue QF_winners;
     PlayersQueue RR_winners;
@@ -788,38 +844,38 @@ void simulatePastTournament(const string& csv_filename, int year) {
     MatchesQueue QFmatches;
     MatchesQueue RRmatches;
     MatchesQueue KOmatches;
-    
+
     cout << "\n=== TOURNAMENT RECORDS FOR YEAR " << year << " ===" << endl;
-    
+
     // Stage 1: Qualifying Rounds
     cout << "\n------------ QUALIFYING ROUNDS" << endl;
     createMatches_QF(allPlayersQueue, QFmatches, year);
     getResults_QF(QFmatches, allPlayersQueue, QF_winners);
-    
+
     // Stage 2: Round Robin
     cout << "\n------------ ROUND ROBIN" << endl;
     createMatches_RR(QF_winners, RRmatches, year);
     getResults_RR(RRmatches, QF_winners, RR_winners);
-    
+
     // Stage 3: Knockout
     cout << "\n------------ KNOCKOUT STAGE" << endl;
     createMatches_KO(RR_winners, KOmatches, year);
     getResults_KO(KOmatches, RR_winners, KO_winners);
-    
+
     // Open file to write tournament history
     ofstream historyFile;
     historyFile.open("history.txt", ios::app); // Append mode
-    
+
     if (historyFile.is_open()) {
         // Write KO matches to file in simple CSV format
         if (!KOmatches.isEmpty()) {
             // Create a temporary queue
             MatchesQueue tempQueue;
-            
+
             // Write all matches by dequeuing and re-enqueuing
             while (!KOmatches.isEmpty()) {
                 Match* match = KOmatches.dequeue();
-                
+
                 // Write match data in simple comma-separated format
                 historyFile << match->matchID << "," 
                           << match->date << "," 
@@ -829,16 +885,16 @@ void simulatePastTournament(const string& csv_filename, int year) {
                           << match->result << "," 
                           << match->score1 << "," 
                           << match->score2 << "\n";
-                
+
                 tempQueue.enqueue(match);
             }
-            
+
             // Restore original queue
             while (!tempQueue.isEmpty()) {
                 KOmatches.enqueue(tempQueue.dequeue());
             }
         }
-        
+
         historyFile.close();
         cout << "(*) Tournament history for year " << year << " saved to history.txt" << endl;
     } else {

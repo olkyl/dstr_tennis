@@ -44,17 +44,15 @@ int getChoice(int max) {
 }
 
 int main() {
-
     // Simulate past tournaments and save results to history.txt
-    simulatePastTournament("players_allYears.csv", 2024);
-    cout << "debug" << endl;
-    cin.get();
-    simulatePastTournament("players_allYears.csv", 2023);
-    cout << "debug" << endl;
-    cin.get();
-
-    // Clear eliminated players list from previous tournaments
-    freePlayerQueue(eliminatedPlayers);
+    int previousYears[] = {2021, 2022, 2023, 2024};
+    for (int year : previousYears) {
+        cout << "\nSimulating tournament for year " << year << "..." << endl;
+        simulatePastTournament("players_allYears.csv", year);
+        
+        // Clear eliminated players between simulations
+        freePlayerQueue(eliminatedPlayers);
+    }
 
     // Initialize queues for players and matches
     PlayersQueue QF_winnersQueue;
@@ -72,10 +70,10 @@ int main() {
     
     do {
         displayMainMenu();
-        choice = getChoice(4); // put 1 for now
+        choice = getChoice(4);
     
         switch (choice) {
-            case 1: { // Tournament Scheduling
+            case 1: { // Task 1
                 handleTournamentScheduling(
                     allPlayersQueue, 
                     QF_winnersQueue, 
@@ -87,11 +85,11 @@ int main() {
                 );
                 break;
             }
-            case 2: 
+            case 2: // Task 2
                 break;
-            case 3: 
+            case 3: // Task 3
                 break;
-            case 4: 
+            case 4: // Task 4
                 break;
             case 0:
                 cout << "Exiting program." << endl;
