@@ -1,6 +1,7 @@
 #include "allStructs.hpp"
 #include "task1_schedulingSystem.hpp"
 #include "task1_playerManager.hpp"
+#include "task4_matchHistory.hpp" 
 #include "task1.hpp"
 #include <iostream>
 #include <limits>
@@ -44,6 +45,7 @@ int getChoice(int max) {
 }
 
 int main() {
+    
     // Simulate past tournaments and save results to history.txt
     int previousYears[] = {2021, 2022, 2023, 2024};
     for (int year : previousYears) {
@@ -90,6 +92,7 @@ int main() {
             case 3: // Task 3
                 break;
             case 4: // Task 4
+                displayHistory();
                 break;
             case 0:
                 cout << "Exiting program." << endl;
@@ -116,4 +119,4 @@ int main() {
     return 0;
 }
 
-// g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp -o main
+// g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task4_matchHistory.cpp -o main
