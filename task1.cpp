@@ -1,5 +1,6 @@
 #include "task1.hpp"
 #include "task1_schedulingSystem.hpp"
+#include "task4_matchHistory.hpp"
 #include <iostream>
 #include <limits>
 
@@ -168,13 +169,21 @@ void handleMatchScheduling(
                 cout << "(!) Knockout match results have already been generated." << endl;
                 displayMatches(KOmatchesQueue);
             } else {
-                while (!KO_winnersQueue.isEmpty()) {
-                    KO_winnersQueue.dequeue();
-                }
+                // ✅ Declare `tournamentChampion`
+                Player* tournamentChampion = nullptr;
+        
                 getResults_KO(KOmatchesQueue, RR_winnersQueue, KO_winnersQueue);
-                KO_resultsGenerated = true;  // Set flag once results are generated
+                KO_resultsGenerated = true;  // ✅ Set flag once results are generated
+        
+                // ✅ Dequeue all winners from `KO_winnersQueue` and store the last one
+                while (!KO_winnersQueue.isEmpty()) {
+                    tournamentChampion = KO_winnersQueue.dequeue();
+                }
+        
+                // ✅ Store Results in History
+                storeResultIntoHistory(KOmatchesQueue, KO_winnersQueue, tournamentYear, tournamentChampion);
             }
-            break;
+            break;                  
         
         case 0: // Return
             return;
