@@ -7,10 +7,13 @@
 #include <limits>
 #include <cstdlib>
 #include <ctime>
+#include "task3_withdrawals.hpp"
 using namespace std;
 
 // Track players who lost in QF, RR, and KO
 PlayersQueue eliminatedPlayers;
+// Define global withdrawn players stack
+WithdrawnPlayersStack withdrawnStack;
 
 // Funtion to clear the terminal screen
 void clearScreen() {
@@ -90,6 +93,7 @@ int main() {
             case 2: // Task 2
                 break;
             case 3: // Task 3
+                handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, withdrawnStack);
                 break;
             case 4: // Task 4
                 displayHistory();
@@ -120,3 +124,5 @@ int main() {
 }
 
 // g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task4_matchHistory.cpp -o main
+
+//g++ -g main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task3_withdrawals.cpp task4_matchHistory.cpp -o main

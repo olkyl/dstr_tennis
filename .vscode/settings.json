@@ -104,6 +104,9 @@
     "sstream": "cpp",
     "stdexcept": "cpp",
     "streambuf": "cpp",
-    "typeinfo": "cpp"
-  }
+    "typeinfo": "cpp",
+    "format": "cpp",
+    "variant": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }

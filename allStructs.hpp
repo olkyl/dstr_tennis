@@ -4,8 +4,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <iomanip> 
+#include "task1_playerManager.hpp"
+#include <iomanip>  
 using namespace std;
+
+extern PlayersQueue eliminatedPlayers; 
 
 // ----------------- Player Structure -----------------
 struct Player {
@@ -29,5 +32,27 @@ struct Match {
     int score2;  // Score of player 2
     Match* next;
 };
+//Task3 Han Bin
 
-#endif
+    // ----------------- Withdrawn Player Structure -----------------
+struct WithdrawnPlayer {
+    string playerID;
+    string playerName;
+    string reason; // Reason for withdrawal (e.g., injury, personal reasons)
+    WithdrawnPlayer* next;
+};
+
+// ----------------- Withdrawn Players Stack -----------------
+class WithdrawnPlayersStack {
+private:
+    WithdrawnPlayer* top;
+
+public:
+    WithdrawnPlayersStack();
+    void push(const string& playerID, const string& playerName, const string& reason);
+    WithdrawnPlayer* pop();
+    bool isEmpty() const;
+    void display() const;
+};
+
+#endif // ALLSTRUCTS_HPP
