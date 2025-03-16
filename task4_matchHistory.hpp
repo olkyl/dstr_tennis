@@ -8,32 +8,33 @@
 #include "task1_playerManager.hpp"
 
 using namespace std;
-
-// Node structure for Stack
-struct Node {
-    string data;
-    Node* next;
-};
-
-// Stack structure for managing history
-struct Stack {
+// ✅ Stack Definition for History Management
+class Stack {
+private:
+    struct Node {
+        string data;
+        Node* next;
+    };
     Node* top;
+        
+public:
     Stack() { top = nullptr; }
-
     void push(const string& value);
     string pop();
     string peek();
-    int size();
     bool isEmpty();
+    int size();
     void display();
 };
-
-// Global stacks for match history
-extern Stack recentHistory;
-extern Stack archiveHistory;
-
-// Function declarations
+    
+// ✅ Declare Global Stacks
+extern Stack recentHistory;  // Stores last 5 tournaments
+extern Stack archiveHistory; // Stores older tournaments
+    
+// ✅ Function to Store Results in History
 void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winnersQueue, int year, Player* champion);
+    
+// ✅ Function to Display History from Stacks
 void displayHistory();
 
 #endif
