@@ -804,31 +804,161 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     cout << "(*) Tournament is completed!" << endl;
 }
 
+// // Function to simulate an entire tournament for a given year and write results to history.txt
+// void simulatePastTournament(const string& csv_filename, int year) {
+//     // Check if data from a specific year already exists
+//     bool yearExists = false;
+//         string yearString = to_string(year); // String to search for year
+        
+//         ifstream checkFile("history.txt");
+//         if (checkFile.is_open()) {
+//             string line;
+//             while (getline(checkFile, line)) {
+//                 // Look for lines that start with "Year: " followed by the year
+//                 if (line.find("Year: " + yearString) != string::npos) {
+//                     yearExists = true;
+//                     break;
+//                 }
+//             }
+//             checkFile.close();
+//         }
+
+//     if (yearExists) {
+//         cout << "(!) Tournament data for year " << year << " already exists in history.txt." << endl;
+//         return;
+//     }
+
+//     // Load players for the specific year
+//     PlayersQueue allPlayersQueue;
+//     loadPlayersToQueue(csv_filename, allPlayersQueue, year);
+
+//     if (allPlayersQueue.size() < 48) {
+//         cout << "(!) Not enough players for year " << year << ". Need exactly 48 players." << endl;
+//         return;
+//     }
+
+//     // Initialize tournament queues
+//     PlayersQueue QF_winners, RR_winners, KO_winners;
+//     MatchesQueue QFmatches, RRmatches, KOmatches;
+
+//     cout << "\n=== TOURNAMENT RECORDS FOR YEAR " << year << " ===" << endl;
+
+//     // Stage 1: Qualifying Rounds
+//     cout << "\n------------ QUALIFYING ROUNDS ------------" << endl;
+//     createMatches_QF(allPlayersQueue, QFmatches, year);
+//     getResults_QF(QFmatches, allPlayersQueue, QF_winners);
+
+//     // Stage 2: Round Robin
+//     cout << "\n------------ ROUND ROBIN ------------" << endl;
+//     createMatches_RR(QF_winners, RRmatches, year);
+//     getResults_RR(RRmatches, QF_winners, RR_winners);
+
+//     // Stage 3: Knockout
+//     cout << "\n------------ KNOCKOUT STAGE ------------" << endl;
+//     createMatches_KO(RR_winners, KOmatches, year);
+//     getResults_KO(KOmatches, RR_winners, KO_winners);
+
+//     // Open text file in append mode
+//     ofstream historyFile;
+//     historyFile.open("history.txt", ios::app);
+
+//     if (historyFile.is_open()) {
+//         // Set up the header for the tournament history
+//         historyFile << "\nYear: " << year << "\n";
+//         historyFile << "---------------------------------------------------------------------------------\n";
+//         historyFile << "| " << setw(8) << "No. " << " | " 
+//                     << setw(8) << "Match ID" << " | " 
+//                     << setw(10) << "Date" << " | " 
+//                     << setw(7) << "Time" << " | " 
+//                     << setw(9) << "Player 1" << " | " 
+//                     << setw(9) << "Player 2" << " | " 
+//                     << setw(8) << "Result" << " |\n";
+//         historyFile << "---------------------------------------------------------------------------------\n";
+
+//         // Write the matches' details in structured table format
+//         MatchesQueue tempQueue;
+//         int count = 1;
+//         while (!KOmatches.isEmpty()) {
+//             Match* match = KOmatches.dequeue();
+
+//             historyFile << "| " << setw(8) << match->matchID << " | " 
+//                         << setw(8) << count << " | "
+//                         << setw(10) << match->date << " | " 
+//                         << setw(7) << match->startTime << " | " 
+//                         << setw(9) << match->player1 << " | " 
+//                         << setw(9) << match->player2 << " | " 
+//                         << setw(8) << match->result << " |\n";
+
+//             tempQueue.enqueue(match);
+//             count++;
+//         }
+//         historyFile << "---------------------------------------------------------------------------------\n";
+
+//         // Restore original queue
+//         while (!tempQueue.isEmpty()) {
+//             KOmatches.enqueue(tempQueue.dequeue());
+//         }
+
+//         // Determine tournament champion
+//         Player* tournamentChampion = nullptr;
+//         while (!KO_winners.isEmpty()) {
+//             tournamentChampion = KO_winners.dequeue();  // The first dequeued player is the champion
+//         }
+
+//         // Append the tournament champion below the displayed table
+//         if (tournamentChampion != nullptr) {
+//             historyFile << "\nTOURNAMENT CHAMPION: " << tournamentChampion->playerName << " (" << tournamentChampion->playerID << ")" << endl;
+//         } else {
+//             historyFile << "\nTOURNAMENT CHAMPION: Unknown" << endl;
+//         }
+
+//         historyFile.close();
+//         cout << "(*) Tournament history for year " << year << " saved to history.txt" << endl;
+//     } else {
+//         cout << "(!) Failed to open history.txt for writing." << endl;
+//     }
+// }
+
 // Function to simulate an entire tournament for a given year and write results to history.txt
 void simulatePastTournament(const string& csv_filename, int year) {
-    // Check if data from a specific year already exists
+    // ✅ Step 1: Check if data from a specific year already exists in history.txt OR archive_history.txt
     bool yearExists = false;
-        string yearString = to_string(year); // String to search for year
-        
-        ifstream checkFile("history.txt");
-        if (checkFile.is_open()) {
+    string yearString = "Year: " + to_string(year);  // String format to search
+
+    // ✅ Check in history.txt
+    ifstream checkFile("history.txt");
+    if (checkFile.is_open()) {
+        string line;
+        while (getline(checkFile, line)) {
+            if (line.find(yearString) != string::npos) {
+                yearExists = true;
+                break;
+            }
+        }
+        checkFile.close();
+    }
+
+    // ✅ Check in archive_history.txt (NEW ADDITION)
+    if (!yearExists) {  // Only check archive if the year wasn't found in history.txt
+        ifstream archiveFile("archive_history.txt");
+        if (archiveFile.is_open()) {
             string line;
-            while (getline(checkFile, line)) {
-                // Look for lines that start with "Year: " followed by the year
-                if (line.find("Year: " + yearString) != string::npos) {
+            while (getline(archiveFile, line)) {
+                if (line.find(yearString) != string::npos) {
                     yearExists = true;
                     break;
                 }
             }
-            checkFile.close();
+            archiveFile.close();
         }
+    }
 
     if (yearExists) {
-        cout << "(!) Tournament data for year " << year << " already exists in history.txt." << endl;
+        cout << "(!) Tournament data for year " << year << " already exists in history.txt or archive_history.txt." << endl;
         return;
     }
 
-    // Load players for the specific year
+    // ✅ If year is NOT found in both files, proceed with simulation
     PlayersQueue allPlayersQueue;
     loadPlayersToQueue(csv_filename, allPlayersQueue, year);
 
@@ -837,33 +967,33 @@ void simulatePastTournament(const string& csv_filename, int year) {
         return;
     }
 
-    // Initialize tournament queues
+    // ✅ Initialize tournament queues
     PlayersQueue QF_winners, RR_winners, KO_winners;
     MatchesQueue QFmatches, RRmatches, KOmatches;
 
     cout << "\n=== TOURNAMENT RECORDS FOR YEAR " << year << " ===" << endl;
 
-    // Stage 1: Qualifying Rounds
+    // ✅ Stage 1: Qualifying Rounds
     cout << "\n------------ QUALIFYING ROUNDS ------------" << endl;
     createMatches_QF(allPlayersQueue, QFmatches, year);
     getResults_QF(QFmatches, allPlayersQueue, QF_winners);
 
-    // Stage 2: Round Robin
+    // ✅ Stage 2: Round Robin
     cout << "\n------------ ROUND ROBIN ------------" << endl;
     createMatches_RR(QF_winners, RRmatches, year);
     getResults_RR(RRmatches, QF_winners, RR_winners);
 
-    // Stage 3: Knockout
+    // ✅ Stage 3: Knockout
     cout << "\n------------ KNOCKOUT STAGE ------------" << endl;
     createMatches_KO(RR_winners, KOmatches, year);
     getResults_KO(KOmatches, RR_winners, KO_winners);
 
-    // Open text file in append mode
+    // ✅ Open history.txt in append mode
     ofstream historyFile;
     historyFile.open("history.txt", ios::app);
 
     if (historyFile.is_open()) {
-        // Set up the header for the tournament history
+        // ✅ Set up the header for the tournament history
         historyFile << "\nYear: " << year << "\n";
         historyFile << "---------------------------------------------------------------------------------\n";
         historyFile << "| " << setw(8) << "No. " << " | " 
@@ -875,7 +1005,7 @@ void simulatePastTournament(const string& csv_filename, int year) {
                     << setw(8) << "Result" << " |\n";
         historyFile << "---------------------------------------------------------------------------------\n";
 
-        // Write the matches' details in structured table format
+        // ✅ Write the matches' details in structured table format
         MatchesQueue tempQueue;
         int count = 1;
         while (!KOmatches.isEmpty()) {
@@ -894,18 +1024,18 @@ void simulatePastTournament(const string& csv_filename, int year) {
         }
         historyFile << "---------------------------------------------------------------------------------\n";
 
-        // Restore original queue
+        // ✅ Restore original queue
         while (!tempQueue.isEmpty()) {
             KOmatches.enqueue(tempQueue.dequeue());
         }
 
-        // Determine tournament champion
+        // ✅ Determine tournament champion
         Player* tournamentChampion = nullptr;
         while (!KO_winners.isEmpty()) {
             tournamentChampion = KO_winners.dequeue();  // The first dequeued player is the champion
         }
 
-        // Append the tournament champion below the displayed table
+        // ✅ Append the tournament champion below the displayed table
         if (tournamentChampion != nullptr) {
             historyFile << "\nTOURNAMENT CHAMPION: " << tournamentChampion->playerName << " (" << tournamentChampion->playerID << ")" << endl;
         } else {
@@ -918,3 +1048,4 @@ void simulatePastTournament(const string& csv_filename, int year) {
         cout << "(!) Failed to open history.txt for writing." << endl;
     }
 }
+
