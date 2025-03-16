@@ -125,4 +125,5 @@ int main() {
 
 // g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task4_matchHistory.cpp -o main
 
-//g++ -g main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task3_withdrawals.cpp task4_matchHistory.cpp -o main
+//g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task3_withdrawals.cpp task4_matchHistory.cpp -o main
+//got error
