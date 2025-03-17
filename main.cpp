@@ -3,6 +3,7 @@
 #include "task1_playerManager.hpp"
 #include "task4_matchHistory.hpp" 
 #include "task1.hpp"
+#include "task4_ui.hpp"  
 #include <iostream>
 #include <limits>
 #include <cstdlib>
@@ -96,7 +97,7 @@ int main() {
                 //apa lancau handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, withdrawnStack);
                 break;
             case 4: // Task 4
-                displayHistory();
+                handleMatchHistory();
                 break;
             case 0:
                 cout << "Exiting program." << endl;
@@ -123,7 +124,7 @@ int main() {
     return 0;
 }
 
-// g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task4_matchHistory.cpp -o main
+// g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task4_matchHistory.cpp task4_ui.cpp -o main
 
 //g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task3_withdrawals.cpp task4_matchHistory.cpp -o main
 //got error

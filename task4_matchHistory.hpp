@@ -30,11 +30,14 @@ public:
 // ✅ Declare Global Stacks
 extern Stack recentHistory;  // Stores last 5 tournaments
 extern Stack archiveHistory; // Stores older tournaments
+extern void clearScreen();
     
 // ✅ Function to Store Results in History
 void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winnersQueue, int year, Player* champion);
     
 // ✅ Function to Display History from Stacks
-void displayHistory();
-
+// void displayHistory();
+void displayRecentHistory();
+void displayArchivedHistory();
+void displayYearlyMatchHistory(const string& filename, int year);
 #endif
