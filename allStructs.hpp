@@ -7,8 +7,6 @@
 #include <iomanip>  
 using namespace std;
 
-extern PlayersQueue eliminatedPlayers; 
-
 // ----------------- Player Structure -----------------
 struct Player {
     string playerID;
