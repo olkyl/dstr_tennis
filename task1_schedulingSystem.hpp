@@ -110,5 +110,7 @@ void getResults_RR(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
 void createMatches_KO(PlayersQueue& playerQueue, MatchesQueue& matchQueue, int year);
 void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, PlayersQueue& winnersQueue);
 void simulatePastTournament(const string& csv_filename, int year);
+string getPlayerNameFromQueue(PlayersQueue& queue, const string& playerID);
+
 
 #endif // SCHEDULING_SYSTEM_HPP
