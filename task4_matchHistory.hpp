@@ -40,4 +40,11 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
 void displayRecentHistory();
 void displayArchivedHistory();
 void displayYearlyMatchHistory(const string& filename, int year);
+void exportMatchHistoryToPDF(const string& filename, int userYear);
+
+#ifdef _WIN32
+// ✅ NEW: Function to Open Save File Dialog (Windows Only)
+string getSaveFilePath();
+#endif
+
 #endif

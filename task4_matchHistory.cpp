@@ -1,8 +1,26 @@
-#include "task4_matchHistory.hpp"
+#ifdef _WIN32  // Only for Windows
+#include <windows.h>
+#include <commdlg.h>  // Required for file dialog
+#endif
 
+#include "task4_matchHistory.hpp"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <filesystem>
+#include <thread> 
+#include <chrono> 
+using namespace std;
+namespace fs = std::filesystem;
+string originalDirectory = fs::current_path().string();
 // Global Stacks
 Stack recentHistory;  
 Stack archiveHistory;  
+string lastSavedFilePath = ""; 
+
+extern string lastSavedFilePath;
 
 // ✅ Stack Functions
 void Stack::push(const string& value) {
@@ -211,56 +229,38 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
     }
 }
 
-// // ✅ Function to Display Recent Match History
-// void displayRecentHistory() {
-//     ifstream historyFile("history.txt");
-
-//     if (!historyFile.is_open()) {
-//         cout << "(!) Error: Could not open history.txt.\n";
-//         return;
-//     }
-
-//     cout << "\n=== RECENT MATCH HISTORY ===\n";
-//     string line;
-//     while (getline(historyFile, line)) {
-//         cout << line << endl;
-//     }
-//     historyFile.close();
-// }
-
-// // ✅ Function to Display Archived Match History
-// void displayArchivedHistory() {
-//     ifstream archiveFile("archive_history.txt");
-
-//     if (!archiveFile.is_open()) {
-//         cout << "(!) No archived history found.\n";
-//         return;
-//     }
-
-//     cout << "\n=== ARCHIVED MATCH HISTORY ===\n";
-//     string line;
-//     while (getline(archiveFile, line)) {
-//         cout << line << endl;
-//     }
-//     archiveFile.close();
-// }
-
-
-// ✅ Function to Display Recent Match History with Search Option
 void displayRecentHistory() {
+    cout << "(*) DEBUG: Checking if history.txt exists...\n";
+
+    if (!fs::exists("history.txt")) {
+        cerr << "(!) ERROR: history.txt DOES NOT EXIST in: " << fs::absolute("history.txt") << endl;
+        cerr << "Ensure the file is properly stored.\n";
+        return;
+    }
+
     ifstream historyFile("history.txt");
 
     if (!historyFile.is_open()) {
-        cout << "(!) Error: Could not open history.txt.\n";
+        cerr << "(!) ERROR: Cannot open history.txt. File may not exist or is empty.\n";
         return;
     }
 
     cout << "\n=== RECENT MATCH HISTORY ===\n";
     string line;
+    bool hasData = false;
+
     while (getline(historyFile, line)) {
-        cout << line << endl;
+        if (!line.empty()) {
+            hasData = true;
+            cout << line << endl;
+        }
     }
-    historyFile.close();
+    historyFile.close();  // ✅ Ensure the file is properly closed
+
+    if (!hasData) {
+        cerr << "(!) ERROR: history.txt exists but is empty.\n";
+        return;
+    }
 
     // ✅ Ask the user if they want to search for a specific year
     int year;
@@ -273,7 +273,6 @@ void displayRecentHistory() {
     }
 }
 
-// ✅ Function to Display Archived Match History with Search Option
 void displayArchivedHistory() {
     ifstream archiveFile("archive_history.txt");
 
@@ -291,16 +290,17 @@ void displayArchivedHistory() {
 
     // ✅ Ask the user if they want to search for a specific year
     int year;
-    cout << "\nEnter a year to search for matches (or enter 0 to return): ";
+    cout << "\nEnter a year to search for matches in archive (or enter 0 to return): ";
     cin >> year;
     cin.ignore();
 
     if (year != 0) {
-        displayYearlyMatchHistory("archive_history.txt", year);
+        // 🔥 Ensure we pass the correct filename
+        displayYearlyMatchHistory("archive_history.txt", year);  
     }
 }
 
-// ✅ Function to Search for a Specific Year and Show a "New Page"
+
 void displayYearlyMatchHistory(const string& filename, int year) {
     ifstream file(filename);
 
@@ -312,6 +312,7 @@ void displayYearlyMatchHistory(const string& filename, int year) {
     string yearStr = "Year: " + to_string(year);
     string line;
     bool found = false;
+    stringstream yearData;  // Store the history for this year
 
     // ✅ Clear Screen
     clearScreen();
@@ -321,6 +322,7 @@ void displayYearlyMatchHistory(const string& filename, int year) {
         if (line.find(yearStr) != string::npos) {
             found = true;
             cout << line << endl;
+            yearData << line << "\n";  // Store for PDF export
 
             // ✅ Print the following lines until the next "Year: " or EOF
             while (getline(file, line)) {
@@ -328,6 +330,7 @@ void displayYearlyMatchHistory(const string& filename, int year) {
                     break;
                 }
                 cout << line << endl;
+                yearData << line << "\n";  // Store for PDF export
             }
             break;
         }
@@ -337,15 +340,16 @@ void displayYearlyMatchHistory(const string& filename, int year) {
 
     if (!found) {
         cout << "(!) No match records found for year " << year << ".\n";
+        return;
     }
 
     // ✅ New UI for Options after viewing the year
     cout << "\n------------------------------------------";
     cout << "\n1. Return to Match History Menu";
-    cout << "\n2. Print as PDF (Coming Soon)";
+    cout << "\n2. Print as PDF";
     cout << "\n------------------------------------------";
     cout << "\nEnter your choice: ";
-    
+
     int choice;
     cin >> choice;
     cin.ignore();
@@ -353,6 +357,144 @@ void displayYearlyMatchHistory(const string& filename, int year) {
     if (choice == 1) {
         return; // ✅ Go back to history menu
     } else if (choice == 2) {
-        cout << "PDF Export Feature Coming Soon!\n"; // ✅ Placeholder for tomorrow
+        cout << "Exporting match history to PDF for year " << year << "...\n";
+        
+        // ✅ Pass the correct filename (history.txt OR archive_history.txt)
+        exportMatchHistoryToPDF(filename, year);  
     }
 }
+
+void exportMatchHistoryToPDF(const string& filename, int userYear) {
+    cout << "Current Working Directory: " << fs::current_path() << endl;
+
+    if (!fs::exists(filename)) {
+        cerr << "(!) ERROR: File does not exist: " << fs::absolute(filename) << endl;
+        return;
+    }
+
+    ifstream historyFile(filename);
+    if (!historyFile.is_open()) {
+        cerr << "ERROR: Cannot open file: " << filename << endl;
+        return;
+    }
+
+    #ifdef _WIN32
+        string savePath = getSaveFilePath();
+        if (savePath.empty()) {
+            cout << "Cancelled PDF save.\n";
+            historyFile.close();
+            return;
+        }
+    #else
+        string savePath = "match_history.pdf";
+    #endif
+
+    ofstream pdfFile(savePath, ios::binary);
+    if (!pdfFile.is_open()) {
+        cerr << "ERROR: Cannot create PDF file: " << savePath << endl;
+        historyFile.close();
+        return;
+    }
+
+    // ✅ PDF Formatting - No Duplicate Headers
+    stringstream textStream;
+    textStream << "BT /F1 12 Tf 50 800 Td (Match History Report for " << userYear << ") Tj ET\n";
+    textStream << "BT /F1 10 Tf 50 780 Td (Year: " << userYear << ") Tj ET\n";
+
+    // ✅ Table Header (Only Appears Once)
+    bool printedHeader = false;
+
+    string yearToFind = "Year: " + to_string(userYear);
+    bool foundYear = false;
+    string line;
+    int yPosition = 760;
+    string winnerLine = "";
+
+    while (getline(historyFile, line)) {
+        if (line.find("Year: ") != string::npos) {
+            if (line.find(yearToFind) != string::npos) {
+                foundYear = true;
+                continue;
+            } else if (foundYear) {
+                break;
+            }
+        }
+
+        if (foundYear) {
+            if (!printedHeader) {
+                // ✅ Print table header only ONCE before first data row
+                textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (------------------------------------------------------------) Tj ET\n";
+                textStream << "BT /F1 10 Tf 50 " << (yPosition - 20) << " Td (| No. | Match ID | Date | Time | Player 1 | Player 2 | Result |) Tj ET\n";
+                textStream << "BT /F1 10 Tf 50 " << (yPosition - 40) << " Td (------------------------------------------------------------) Tj ET\n";
+                yPosition -= 60;  // Move Y position down for first row
+                printedHeader = true;
+            }
+
+            if (line.find("TOURNAMENT CHAMPION:") != string::npos) {
+                winnerLine = line;  // ✅ Store the winner line separately to print after the table
+                continue;
+            }
+
+            textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (" << line << ") Tj ET\n";
+            yPosition -= 20;
+        }
+    }
+
+    historyFile.close(); // ✅ Ensure file is closed after reading
+
+    if (!foundYear) {
+        cerr << "(!) ERROR: Year " << userYear << " not found in " << filename << ".\n";
+        return;
+    }
+
+    // ✅ Print Winner Line **Before** the Final Separator
+    if (!winnerLine.empty()) {
+        textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (" << winnerLine << ") Tj ET\n";
+        yPosition -= 20;
+    }
+
+    // ✅ Now Print the Final Horizontal Line BELOW Winner
+    textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (------------------------------------------------------------) Tj ET\n";
+
+    pdfFile << "%PDF-1.7\n";
+    pdfFile << "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+    pdfFile << "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n";
+    pdfFile << "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n";
+    string content = textStream.str();
+    pdfFile << "4 0 obj\n<< /Length " << content.length() << " >>\nstream\n" << content << "\nendstream\nendobj\n";
+    pdfFile << "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>\nendobj\n";
+    pdfFile << "xref\n0 6\n0000000000 65535 f \n0000000010 00000 n \n0000000065 00000 n \n0000000120 00000 n \n0000000240 00000 n \n0000000420 00000 n \n";
+    pdfFile << "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n500\n%%EOF";
+
+    pdfFile.close();
+    cout << "(*) PDF Saved to: " << savePath << endl;
+}
+
+    #ifdef _WIN32
+    string getSaveFilePath() {
+        char filename[MAX_PATH] = {0};
+    
+        OPENFILENAME ofn;
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = NULL;
+        ofn.lpstrFilter = "PDF Files (*.pdf)\0*.pdf\0All Files (*.*)\0*.*\0";
+        ofn.lpstrFile = filename;
+        ofn.nMaxFile = MAX_PATH;
+        ofn.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN | OFN_CREATEPROMPT;
+        ofn.lpstrDefExt = "pdf";
+    
+        if (GetSaveFileName(&ofn)) {
+            string filePath = string(filename);
+    
+            // ✅ Ensure the file has a .pdf extension
+            if (filePath.find(".pdf") == string::npos) {
+                filePath += ".pdf";  // Append .pdf if missing
+            }
+    
+            return filePath;
+        }
+        return ""; // Return empty string if user cancels
+    }
+    #endif
+
