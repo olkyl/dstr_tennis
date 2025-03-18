@@ -364,6 +364,92 @@ void displayYearlyMatchHistory(const string& filename, int year) {
     }
 }
 
+// void exportMatchHistoryToPDF(const string& filename, int userYear) {
+//     cout << "Current Working Directory: " << fs::current_path() << endl;
+
+//     if (!fs::exists(filename)) {
+//         cerr << "(!) ERROR: File does not exist: " << fs::absolute(filename) << endl;
+//         return;
+//     }
+
+//     ifstream historyFile(filename);
+//     if (!historyFile.is_open()) {
+//         cerr << "ERROR: Cannot open file: " << filename << endl;
+//         return;
+//     }
+
+//     #ifdef _WIN32
+//         string savePath = getSaveFilePath();
+//         if (savePath.empty()) {
+//             cout << "Cancelled PDF save.\n";
+//             historyFile.close();
+//             return;
+//         }
+//     #else
+//         string savePath = "match_history.pdf";
+//     #endif
+
+//     ofstream pdfFile(savePath, ios::binary);
+//     if (!pdfFile.is_open()) {
+//         cerr << "ERROR: Cannot create PDF file: " << savePath << endl;
+//         historyFile.close();
+//         return;
+//     }
+
+//     // ✅ PDF Formatting
+//     stringstream textStream;
+//     textStream << "BT /F1 12 Tf 50 800 Td (Match History Report for " << userYear << ") Tj ET\n";
+//     textStream << "BT /F1 10 Tf 50 780 Td (Year: " << userYear << ") Tj ET\n";
+//     textStream << "BT /F1 10 Tf 50 760 Td (------------------------------------------------------------) Tj ET\n";
+//     textStream << "BT /F1 10 Tf 50 740 Td (| No. | Match ID | Date | Time | Player 1 | Player 2 | Result |) Tj ET\n";
+//     textStream << "BT /F1 10 Tf 50 720 Td (------------------------------------------------------------) Tj ET\n";
+
+//     string yearToFind = "Year: " + to_string(userYear);
+//     bool foundYear = false;
+//     string line;
+//     int yPosition = 700;
+
+//     while (getline(historyFile, line)) {
+//         if (line.find("Year: ") != string::npos) {
+//             if (line.find(yearToFind) != string::npos) {
+//                 foundYear = true;
+//                 continue;
+//             } else if (foundYear) {
+//                 break;
+//             }
+//         }
+//         if (foundYear) {
+//             textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (" << line << ") Tj ET\n";
+//             yPosition -= 20;
+//         }
+//     }
+
+//     historyFile.close();
+
+//     if (!foundYear) {
+//         cerr << "(!) ERROR: Year " << userYear << " not found in " << filename << ".\n";
+//         return;
+//     }
+
+//     textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (------------------------------------------------------------) Tj ET\n";
+
+//     pdfFile << "%PDF-1.7\n";
+//     pdfFile << "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+//     pdfFile << "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n";
+//     pdfFile << "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n";
+//     string content = textStream.str();
+//     pdfFile << "4 0 obj\n<< /Length " << content.length() << " >>\nstream\n" << content << "\nendstream\nendobj\n";
+//     pdfFile << "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>\nendobj\n";
+//     pdfFile << "xref\n0 6\n0000000000 65535 f \n0000000010 00000 n \n0000000065 00000 n \n0000000120 00000 n \n0000000240 00000 n \n0000000420 00000 n \n";
+//     pdfFile << "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n500\n%%EOF";
+
+//     pdfFile.close();
+//     cout << "(*) PDF Saved to: " << savePath << endl;
+
+//     // ✅ RESET THE WORKING DIRECTORY BACK TO THE ORIGINAL PATH
+//     cout << "(*) DEBUG: Resetting working directory back to: " << originalDirectory << endl;
+//     fs::current_path(originalDirectory);
+// }
 void exportMatchHistoryToPDF(const string& filename, int userYear) {
     cout << "Current Working Directory: " << fs::current_path() << endl;
 
@@ -396,18 +482,17 @@ void exportMatchHistoryToPDF(const string& filename, int userYear) {
         return;
     }
 
-    // ✅ PDF Formatting
+    // ✅ Keep PDF Formatting
     stringstream textStream;
     textStream << "BT /F1 12 Tf 50 800 Td (Match History Report for " << userYear << ") Tj ET\n";
     textStream << "BT /F1 10 Tf 50 780 Td (Year: " << userYear << ") Tj ET\n";
-    textStream << "BT /F1 10 Tf 50 760 Td (------------------------------------------------------------) Tj ET\n";
-    textStream << "BT /F1 10 Tf 50 740 Td (| No. | Match ID | Date | Time | Player 1 | Player 2 | Result |) Tj ET\n";
-    textStream << "BT /F1 10 Tf 50 720 Td (------------------------------------------------------------) Tj ET\n";
 
     string yearToFind = "Year: " + to_string(userYear);
     bool foundYear = false;
     string line;
-    int yPosition = 700;
+    int yPosition = 760;
+    int lastYPosition = yPosition; // ✅ Store last printed position
+    bool firstSeparatorAdded = false;
 
     while (getline(historyFile, line)) {
         if (line.find("Year: ") != string::npos) {
@@ -419,7 +504,15 @@ void exportMatchHistoryToPDF(const string& filename, int userYear) {
             }
         }
         if (foundYear) {
+            // ✅ Add the first separator line before the header
+            if (!firstSeparatorAdded && line.find("| No.") != string::npos) {
+                textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (------------------------------------------------------------------) Tj ET\n";
+                yPosition -= 20;
+                firstSeparatorAdded = true;
+            }
+
             textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (" << line << ") Tj ET\n";
+            lastYPosition = yPosition;  // ✅ Track last position
             yPosition -= 20;
         }
     }
@@ -431,7 +524,10 @@ void exportMatchHistoryToPDF(const string& filename, int userYear) {
         return;
     }
 
-    textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (------------------------------------------------------------) Tj ET\n";
+    // ✅ Extend bottom separator line to match table width
+    int bottomLineY = lastYPosition - 30; // Move up 10 units
+    string bottomLine = "---------------------------------------------------------------------------------"; // ✅ Longer separator to match table
+    textStream << "BT /F1 10 Tf 50 " << bottomLineY << " Td (" << bottomLine << ") Tj ET\n";
 
     pdfFile << "%PDF-1.7\n";
     pdfFile << "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
@@ -446,10 +542,11 @@ void exportMatchHistoryToPDF(const string& filename, int userYear) {
     pdfFile.close();
     cout << "(*) PDF Saved to: " << savePath << endl;
 
-    // ✅ RESET THE WORKING DIRECTORY BACK TO THE ORIGINAL PATH
+    // ✅ Reset Working Directory
     cout << "(*) DEBUG: Resetting working directory back to: " << originalDirectory << endl;
     fs::current_path(originalDirectory);
 }
+
 
     #ifdef _WIN32
     string getSaveFilePath() {
