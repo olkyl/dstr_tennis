@@ -396,19 +396,18 @@ void exportMatchHistoryToPDF(const string& filename, int userYear) {
         return;
     }
 
-    // ✅ PDF Formatting - No Duplicate Headers
+    // ✅ PDF Formatting
     stringstream textStream;
     textStream << "BT /F1 12 Tf 50 800 Td (Match History Report for " << userYear << ") Tj ET\n";
     textStream << "BT /F1 10 Tf 50 780 Td (Year: " << userYear << ") Tj ET\n";
-
-    // ✅ Table Header (Only Appears Once)
-    bool printedHeader = false;
+    textStream << "BT /F1 10 Tf 50 760 Td (------------------------------------------------------------) Tj ET\n";
+    textStream << "BT /F1 10 Tf 50 740 Td (| No. | Match ID | Date | Time | Player 1 | Player 2 | Result |) Tj ET\n";
+    textStream << "BT /F1 10 Tf 50 720 Td (------------------------------------------------------------) Tj ET\n";
 
     string yearToFind = "Year: " + to_string(userYear);
     bool foundYear = false;
     string line;
-    int yPosition = 760;
-    string winnerLine = "";
+    int yPosition = 700;
 
     while (getline(historyFile, line)) {
         if (line.find("Year: ") != string::npos) {
@@ -419,41 +418,19 @@ void exportMatchHistoryToPDF(const string& filename, int userYear) {
                 break;
             }
         }
-
         if (foundYear) {
-            if (!printedHeader) {
-                // ✅ Print table header only ONCE before first data row
-                textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (------------------------------------------------------------) Tj ET\n";
-                textStream << "BT /F1 10 Tf 50 " << (yPosition - 20) << " Td (| No. | Match ID | Date | Time | Player 1 | Player 2 | Result |) Tj ET\n";
-                textStream << "BT /F1 10 Tf 50 " << (yPosition - 40) << " Td (------------------------------------------------------------) Tj ET\n";
-                yPosition -= 60;  // Move Y position down for first row
-                printedHeader = true;
-            }
-
-            if (line.find("TOURNAMENT CHAMPION:") != string::npos) {
-                winnerLine = line;  // ✅ Store the winner line separately to print after the table
-                continue;
-            }
-
             textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (" << line << ") Tj ET\n";
             yPosition -= 20;
         }
     }
 
-    historyFile.close(); // ✅ Ensure file is closed after reading
+    historyFile.close();
 
     if (!foundYear) {
         cerr << "(!) ERROR: Year " << userYear << " not found in " << filename << ".\n";
         return;
     }
 
-    // ✅ Print Winner Line **Before** the Final Separator
-    if (!winnerLine.empty()) {
-        textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (" << winnerLine << ") Tj ET\n";
-        yPosition -= 20;
-    }
-
-    // ✅ Now Print the Final Horizontal Line BELOW Winner
     textStream << "BT /F1 10 Tf 50 " << yPosition << " Td (------------------------------------------------------------) Tj ET\n";
 
     pdfFile << "%PDF-1.7\n";
@@ -468,6 +445,10 @@ void exportMatchHistoryToPDF(const string& filename, int userYear) {
 
     pdfFile.close();
     cout << "(*) PDF Saved to: " << savePath << endl;
+
+    // ✅ RESET THE WORKING DIRECTORY BACK TO THE ORIGINAL PATH
+    cout << "(*) DEBUG: Resetting working directory back to: " << originalDirectory << endl;
+    fs::current_path(originalDirectory);
 }
 
     #ifdef _WIN32
