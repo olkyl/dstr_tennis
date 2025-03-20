@@ -337,9 +337,6 @@ void handleTournamentScheduling(
                     // Check if user canceled the year input
                     if (tournamentYear == 0) {
                         cout << "(#) Match scheduling canceled." << endl;
-                        cout << "Press Enter to continue...";
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                        cin.get();
                         break;
                     }
                     
