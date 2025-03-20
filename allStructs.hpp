@@ -29,7 +29,7 @@ struct Match {
     int score2;  // Score of player 2
     Match* next;
 };
-//菜就多练 git,不要逼逼赖赖o(*￣▽￣*)ブ
+//菜就多练 git,不要逼逼赖赖o(*￣▽￣*)ブ 
 
 
 #endif // ALLSTRUCTS_HPP
