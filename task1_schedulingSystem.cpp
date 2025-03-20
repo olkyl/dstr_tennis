@@ -805,8 +805,8 @@ void getResults_KO(MatchesQueue& matchQueue, PlayersQueue& playersQueue, Players
     cout << "(*) Tournament is completed!" << endl;
 }
 
-// ✅ Function to find a player in the queue by ID and return their name
-string getPlayerNameFromQueue(PlayersQueue& queue, const string& playerID) {
+// Function to find a player in the queue by ID and return their name
+string getPlayerName(PlayersQueue& queue, const string& playerID) {
     PlayersQueue tempQueue;
     string playerName = playerID;  // Default to ID if not found
 
@@ -818,7 +818,7 @@ string getPlayerNameFromQueue(PlayersQueue& queue, const string& playerID) {
         tempQueue.enqueue(p);  // Preserve original queue
     }
 
-    // ✅ Restore queue
+    // Restore queue
     while (!tempQueue.isEmpty()) {
         queue.enqueue(tempQueue.dequeue());
     }
@@ -826,9 +826,9 @@ string getPlayerNameFromQueue(PlayersQueue& queue, const string& playerID) {
     return playerName;
 }
 
-// ✅ Function to simulate an entire tournament for a given year and write results to history.txt
+// Function to simulate an entire tournament for a given year and write results to history.txt
 void simulatePastTournament(const string& csv_filename, int year) {
-    // ✅ Check if data from this year already exists
+    // Check if data from the inputted year already exists
     bool yearExists = false;
     string yearString = "Year: " + to_string(year);
 
@@ -844,8 +844,8 @@ void simulatePastTournament(const string& csv_filename, int year) {
         checkFile.close();
     }
     
-    // ✅ Check in archive_history.txt (NEW ADDITION)
-    if (!yearExists) {  // Only check archive if the year wasn't found in history.txt
+    // Check if data from the inputted year already exists
+    if (!yearExists) {  // Only check archive_history.txt if the year was not found in history.txt
         ifstream archiveFile("archive_history.txt");
         if (archiveFile.is_open()) {
             string line;
@@ -864,7 +864,7 @@ void simulatePastTournament(const string& csv_filename, int year) {
         return;
     }
 
-    // ✅ Load players into queue (Now contains player names!)
+    // Load all registered players from that year into queue
     PlayersQueue allPlayersQueue;
     loadPlayersToQueue(csv_filename, allPlayersQueue, year);
 
@@ -873,30 +873,30 @@ void simulatePastTournament(const string& csv_filename, int year) {
         return;
     }
 
-    // ✅ Initialize tournament queues
+    // Initialize tournament queues
     PlayersQueue QF_winners, RR_winners, KO_winners;
     MatchesQueue QFmatches, RRmatches, KOmatches;
 
     cout << "\n=== TOURNAMENT RECORDS FOR YEAR " << year << " ===" << endl;
 
-    // ✅ Stage 1: Qualifying Rounds
+    // Initiate Qualifying Rounds
     createMatches_QF(allPlayersQueue, QFmatches, year);
     getResults_QF(QFmatches, allPlayersQueue, QF_winners);
 
-    // ✅ Stage 2: Round Robin
+    // Initiate Round Robin
     createMatches_RR(QF_winners, RRmatches, year);
     getResults_RR(RRmatches, QF_winners, RR_winners);
 
-    // ✅ Stage 3: Knockout
+    // Initiate Knockout
     createMatches_KO(RR_winners, KOmatches, year);
     getResults_KO(KOmatches, RR_winners, KO_winners);
 
-    // ✅ Open history.txt in append mode
+    // Open history.txt in append mode
     ofstream historyFile;
     historyFile.open("history.txt", ios::app);
 
     if (historyFile.is_open()) {
-        // ✅ Write the tournament header
+        // Write the tournament header and table in a structured format into the text file
         historyFile << "\nYear: " << year << "\n";
         historyFile << "---------------------------------------------------------------------------------\n";
         historyFile << "| " << setw(8) << "No. " << " | " 
@@ -908,9 +908,9 @@ void simulatePastTournament(const string& csv_filename, int year) {
                     << setw(8) << "Result" << " |\n";
         historyFile << "---------------------------------------------------------------------------------\n";
 
-        // ✅ Track all unique player IDs
+        // Track all unique player IDs
         set<string> allPlayerIDs;
-        MatchesQueue tempQueue;
+        MatchesQueue matchesPlaceholder;
         int count = 1;
 
         while (!KOmatches.isEmpty()) {
@@ -928,33 +928,33 @@ void simulatePastTournament(const string& csv_filename, int year) {
             allPlayerIDs.insert(match->player2);
             allPlayerIDs.insert(match->result);
 
-            tempQueue.enqueue(match);
+            matchesPlaceholder.enqueue(match);
             count++;
         }
         historyFile << "---------------------------------------------------------------------------------\n";
 
-        // ✅ Restore original queue
-        while (!tempQueue.isEmpty()) {
-            KOmatches.enqueue(tempQueue.dequeue());
+        // Restore original queue for matches
+        while (!matchesPlaceholder.isEmpty()) {
+            KOmatches.enqueue(matchesPlaceholder.dequeue());
         }
 
-        // ✅ Determine tournament champion
+        // Determine the tournament champion
         Player* tournamentChampion = nullptr;
         while (!KO_winners.isEmpty()) {
             tournamentChampion = KO_winners.dequeue();
         }
 
-        // ✅ Append the tournament champion
+        // Append the tournament champion below the table
         if (tournamentChampion != nullptr) {
             historyFile << "\nTOURNAMENT CHAMPION: " << tournamentChampion->playerName << " (" << tournamentChampion->playerID << ")" << endl;
         } else {
             historyFile << "\nTOURNAMENT CHAMPION: Unknown" << endl;
         }
 
-        // ✅ Final Player Name List (Now Correctly Fetching Names)
+        // Include a list of names at the end of the file
         historyFile << "\n---------------------------- FINAL PLAYER NAME LIST: ----------------------------\n";
         for (const string& playerID : allPlayerIDs) {
-            string playerName = getPlayerNameFromQueue(allPlayersQueue, playerID);
+            string playerName = getPlayerName(allPlayersQueue, playerID);
             historyFile << playerID << " (" << playerName << ")\n";
         }
 

@@ -144,7 +144,7 @@ void storeResultIntoHistory(MatchesQueue& KOmatchesQueue, PlayersQueue& KO_winne
 
     historyEntry << "\n----------------------------- FINAL PLAYER NAME LIST: ---------------------------\n";
     for (const string& playerID : allPlayerIDs) {
-        string playerName = getPlayerNameFromQueue(allPlayersQueue, playerID);
+        string playerName = getPlayerName(allPlayersQueue, playerID);
         historyEntry << playerID << " (" << playerName << ")\n";
     }
 
