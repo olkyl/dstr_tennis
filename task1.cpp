@@ -222,17 +222,19 @@ void handlePlayerProgressionView(
 int getValidYear() {
     int year;
     do {
-        cout << "Enter year for the tournament: ";
+        cout << "Enter year for the tournament (0 to cancel): ";
         cin >> year;
+        
         if (cin.fail()) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "(!) Invalid input. Please enter a numeric value." << endl;
             continue;
         }
-        if (year <= 2024) {
-            cout << "(!) Year must be greater than 2024." << endl;
-            continue;
+        
+        // Check if user wants to cancel
+        if (year == 0) {
+            return 0; // Stop the function
         }
         
         // Check if tournament data for this year already exists in history.txt
@@ -328,11 +330,18 @@ void handleTournamentScheduling(
 
         switch (option) {
             case 1: // Schedule Matches
-                // Ask for year input only once
+                // Ask for year input
                 if (!yearInput) {
                     tournamentYear = getValidYear();
+                    
+                    // Check if user canceled the year input
+                    if (tournamentYear == 0) {
+                        cout << "(#) Match scheduling canceled." << endl;
+                        break;
+                    }
+                    
                     yearInput = true;
-                    cout << "Tournament year set to: " << tournamentYear << endl;
+                    cout << "(*) Tournament year set to: " << tournamentYear << endl;
                     cout << "Press Enter to continue...";
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cin.get();
