@@ -181,9 +181,15 @@ void ticketSales()
 
     // Ask for user input and save into an array
     int numberOfPeople;
-    cout << "\nHow many people in the queue: ";
+    cout << "\nHow many people in the queue [Enter 0 to end]: ";
     cin >> numberOfPeople;
     cin.ignore();
+
+    // Quit Program When the Input is "0"
+    if (numberOfPeople == 0)
+    {
+        return;
+    }
 
     Ticket ticketArray[numberOfPeople];
     for (int i = 0; i < numberOfPeople; i++)
@@ -191,13 +197,20 @@ void ticketSales()
         string clientName;
         int priorityLevel;
 
-        cout << "\nCustomer " << (i + 1) << " Name: ";
+        cout << "\nCustomer " << (i + 1) << " Name [Enter 0 to end]: ";
         getline(cin, clientName);
+        if (clientName == "0")
+        {
+            return;
+        }
 
-        cout << "Customer Type (VIP=3, Early-bird=2, Public Access=1): ";
+        cout << "Customer Type (VIP=3, Early-bird=2, Public Access=1) [Enter 0 to end]: ";
         cin >> priorityLevel;
-
         cin.ignore();
+        if (priorityLevel == 0 || priorityLevel != 3 || priorityLevel != 2 || priorityLevel != 1)
+        {
+            return;
+        }
 
         ticketArray[i] = Ticket(clientName, priorityLevel);
     }
