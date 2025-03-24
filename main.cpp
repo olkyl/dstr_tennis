@@ -13,8 +13,13 @@
 using namespace std;
 
 // Track players who lost in QF, RR, and KO
+
 PlayersQueue eliminatedPlayers;
 
+
+
+// Global stack for Task 3
+WithdrawnPlayersStack withdrawnStack; // Added
 
 // Funtion to clear the terminal screen
 void clearScreen()
@@ -25,6 +30,8 @@ void clearScreen()
     system("clear");
 #endif
 }
+
+
 
 void displayMainMenu()
 {
@@ -103,7 +110,8 @@ int main()
             ticketSales();
             break;
         case 3: // Task 3
-            // apa lancau handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, withdrawnStack);
+        handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, QFmatchesQueue, RRmatchesQueue,
+            KOmatchesQueue, withdrawnStack, tournamentYear);
             break;
         case 4: // Task 4
             handleMatchHistory();
@@ -136,5 +144,4 @@ int main()
 
 // g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task4_matchHistory.cpp task4_ui.cpp task2_TicketSales.cpp -o main -lcomdlg32
 
-// g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task3_withdrawals.cpp task4_matchHistory.cpp -o main
-// got error
+//g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task2_TicketSales.cpp task3_withdrawals.cpp task4_matchHistory.cpp task4_ui.cpp -o main 
