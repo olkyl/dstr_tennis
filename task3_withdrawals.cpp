@@ -95,7 +95,7 @@ void handlePlayerWithdrawals(
     MatchesQueue& RRmatchesQueue, 
     MatchesQueue& KOmatchesQueue, 
     WithdrawnPlayersStack& withdrawnStack, 
-    int tournamentYear
+    int targetYear
 ) {
     int choice;
     do {
@@ -146,7 +146,7 @@ void handlePlayerWithdrawals(
 
                     // Record withdrawal in stack
                     stringstream timestamp;
-                    timestamp << tournamentYear << "-03-23"; // Placeholder, adjust as needed
+                    timestamp << targetYear << "-03-23"; // Placeholder, adjust as needed
                     withdrawnStack.push(playerID, timestamp.str());
                     cout << "(*) Withdrawal recorded for " << playerID << " on " << timestamp.str() << "." << endl;
                 }
