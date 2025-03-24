@@ -14,8 +14,7 @@ using namespace std;
 
 // Track players who lost in QF, RR, and KO
 PlayersQueue eliminatedPlayers;
-// // Define global withdrawn players stack
-// WithdrawnPlayersStack withdrawnStack; //apa lancau lah
+
 
 // Funtion to clear the terminal screen
 void clearScreen()
