@@ -169,18 +169,25 @@ void handleMatchScheduling(
                 cout << "(!) Knockout match results have already been generated." << endl;
                 displayMatches(KOmatchesQueue);
             } else {
-                // ✅ Declare `tournamentChampion`
                 Player* tournamentChampion = nullptr;
-        
+                PlayersQueue winnersPlaceholder;
+
                 getResults_KO(KOmatchesQueue, RR_winnersQueue, KO_winnersQueue);
-                KO_resultsGenerated = true;  // ✅ Set flag once results are generated
-        
-                // ✅ Dequeue all winners from `KO_winnersQueue` and store the last one
+                KO_resultsGenerated = true;  // Set flag once results are generated
+
+                // Dequeue all winners from KO_winnersQueue and store in winnersPlaceholder
                 while (!KO_winnersQueue.isEmpty()) {
-                    tournamentChampion = KO_winnersQueue.dequeue();
+                    Player* winner = KO_winnersQueue.dequeue();
+                    winnersPlaceholder.enqueue(winner);  // Store each winner in placeholder
+                    tournamentChampion = winner;  // Last one will be the champion
                 }
-        
-                // ✅ Store Results in History
+
+                // Requeue all winners back into KO_winnersQueue
+                while (!winnersPlaceholder.isEmpty()) {
+                    KO_winnersQueue.enqueue(winnersPlaceholder.dequeue());
+                }
+    
+                // Store results in history
                 storeResultIntoHistory(KOmatchesQueue, KO_winnersQueue, tournamentYear, tournamentChampion);
             }
             break;                  
