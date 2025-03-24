@@ -62,7 +62,10 @@ void handleMatchScheduling(
     static bool RR_resultsGenerated = false;
     static bool KO_resultsGenerated = false;
 
-    loadPlayersToQueue("players_allYears.csv", allPlayersQueue, tournamentYear);
+    // Only load players if the queue is empty
+    if (allPlayersQueue.isEmpty()) {
+        loadPlayersToQueue("players_allYears.csv", allPlayersQueue, tournamentYear);
+    }
     
     display_SubSchedulingMenu();
     int scheduleChoice = getChoice(9);

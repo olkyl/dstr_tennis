@@ -11,7 +11,7 @@
 #include <ctime>
 #include "task3_withdrawals.hpp"
 using namespace std;
-// (づ ◕‿◕ )づ No more Ara ara
+
 // Global queues
 PlayersQueue eliminatedPlayers;
 PlayersQueue allPlayersQueue;
@@ -21,7 +21,7 @@ PlayersQueue KO_winnersQueue;
 MatchesQueue QFmatchesQueue;
 MatchesQueue RRmatchesQueue;
 MatchesQueue KOmatchesQueue;
-WithdrawnPlayersStack withdrawnStack; // Already correct
+WithdrawnPlayersStack withdrawnStack;
 
 void clearScreen() {
 #ifdef _WIN32
@@ -54,16 +54,12 @@ int getChoice(int max) {
 }
 
 int main() {
-    int targetYear = 2025;
-
     int previousYears[] = {2021, 2022, 2023, 2024};
     for (int year : previousYears) {
         cout << "\nSimulating tournament for year " << year << "..." << endl;
         simulatePastTournament("players_allYears.csv", year);
         freePlayerQueue(eliminatedPlayers);
     }
-
-    loadPlayersToQueue("players_allYears.csv", allPlayersQueue, targetYear);
 
     int choice;
     do {
@@ -72,15 +68,13 @@ int main() {
 
         switch (choice) {
             case 1:
-                handleTournamentScheduling(allPlayersQueue, QF_winnersQueue, RR_winnersQueue, KO_winnersQueue,
-                                           QFmatchesQueue, RRmatchesQueue, KOmatchesQueue);
+                handleTournamentScheduling(allPlayersQueue, QF_winnersQueue, RR_winnersQueue, KO_winnersQueue, QFmatchesQueue, RRmatchesQueue, KOmatchesQueue);
                 break;
             case 2:
                 ticketSales();
                 break;
             case 3:
-                handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, QFmatchesQueue, RRmatchesQueue,
-                                        KOmatchesQueue, withdrawnStack, targetYear); // Fixed with all 7 arguments
+                handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, QFmatchesQueue, RRmatchesQueue, KOmatchesQueue, withdrawnStack, 2025);
                 break;
             case 4:
                 handleMatchHistory();

@@ -100,18 +100,22 @@ void handlePlayerWithdrawals(
                     cin >> playerID;
                     cin.ignore();
 
+                    // Create a copy of allPlayersQueue to find the player
                     PlayersQueue tempQueue;
                     Player* withdrawnPlayer = nullptr;
                     bool found = false;
+                    
+                    // Make a copy of all players
                     while (!allPlayersQueue.isEmpty()) {
                         Player* player = allPlayersQueue.dequeue();
                         if (player->playerID == playerID && !found) {
-                            withdrawnPlayer = player;
+                            withdrawnPlayer = new Player(*player); // Create a copy for eliminatedPlayers
                             found = true;
-                        } else {
-                            tempQueue.enqueue(player, player->rank);
                         }
+                        tempQueue.enqueue(player, player->rank);
                     }
+                    
+                    // Restore all players back to the original queue
                     while (!tempQueue.isEmpty()) {
                         allPlayersQueue.enqueue(tempQueue.dequeue());
                     }
@@ -119,7 +123,7 @@ void handlePlayerWithdrawals(
                     if (!found) {
                         cout << "(!) Player ID " << playerID << " not found in the tournament." << endl;
                     } else {
-                        eliminatedPlayers.enqueue(withdrawnPlayer, withdrawnPlayer->rank);
+                        // eliminatedPlayers.enqueue(withdrawnPlayer, withdrawnPlayer->rank);
                         updateMatches(*targetQueue, playerID);
                         stringstream timestamp;
                         timestamp << targetYear; 

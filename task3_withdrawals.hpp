@@ -52,7 +52,7 @@ public:
             cout << "(#) No players have been withdrawn yet." << endl;
             return;
         }
-        cout << "=== WITHDRAWN PLAYERS ===" << endl;
+        cout << "=== ELIMINATED PLAYERS DUE TO WITHDRAWALS ===" << endl;
         Withdrawal* current = top;
         while (current) {
             cout << "Player ID: " << current->playerID << " | Withdrawn on: " << current->timestamp << endl;
