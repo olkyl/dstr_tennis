@@ -61,6 +61,8 @@ void handleMatchScheduling(
     static bool QF_resultsGenerated = false;
     static bool RR_resultsGenerated = false;
     static bool KO_resultsGenerated = false;
+
+    loadPlayersToQueue("players_allYears.csv", allPlayersQueue, tournamentYear);
     
     display_SubSchedulingMenu();
     int scheduleChoice = getChoice(9);
