@@ -72,10 +72,7 @@ int main()
     MatchesQueue QFmatchesQueue;
     MatchesQueue RRmatchesQueue;
     MatchesQueue KOmatchesQueue;
-
-    // Load 2025 participants from CSV file
     PlayersQueue allPlayersQueue;
-    loadPlayersToQueue("players_allYears.csv", allPlayersQueue, 2025);
 
     int choice;
 
@@ -134,6 +131,3 @@ int main()
 }
 
 // g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task4_matchHistory.cpp task4_ui.cpp task2_TicketSales.cpp -o main -lcomdlg32
-
-// g++ main.cpp task1_playerManager.cpp task1_schedulingSystem.cpp task1.cpp task3_withdrawals.cpp task4_matchHistory.cpp -o main
-// got error
