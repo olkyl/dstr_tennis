@@ -196,6 +196,7 @@ void ticketSales()
 
         cout << "Customer Type (VIP=3, Early-bird=2, Public Access=1): ";
         cin >> priorityLevel;
+
         cin.ignore();
 
         ticketArray[i] = Ticket(clientName, priorityLevel);
