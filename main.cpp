@@ -15,7 +15,6 @@ using namespace std;
 // Track players who lost in QF, RR, and KO
 PlayersQueue eliminatedPlayers;
 
-
 // Funtion to clear the terminal screen
 void clearScreen()
 {
