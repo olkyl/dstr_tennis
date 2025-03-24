@@ -11,7 +11,7 @@
 #include <ctime>
 #include "task3_withdrawals.hpp"
 using namespace std;
-//Ara ara
+// (づ ◕‿◕ )づ No more Ara ara
 // Global queues
 PlayersQueue eliminatedPlayers;
 PlayersQueue allPlayersQueue;
