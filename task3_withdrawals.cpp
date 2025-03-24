@@ -123,7 +123,6 @@ void handlePlayerWithdrawals(
                     if (!found) {
                         cout << "(!) Player ID " << playerID << " not found in the tournament." << endl;
                     } else {
-                        // eliminatedPlayers.enqueue(withdrawnPlayer, withdrawnPlayer->rank);
                         updateMatches(*targetQueue, playerID);
                         stringstream timestamp;
                         timestamp << targetYear; 

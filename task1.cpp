@@ -333,8 +333,8 @@ void handleTournamentScheduling(
     MatchesQueue& KOmatchesQueue
 ) {
     int option;
-    bool yearInput = false;  // Flag to track if year has been input
-    int tournamentYear = 0;  // Variable to store the tournament year
+    static bool yearInput = false;  // Flag to track if year has been input
+    static int tournamentYear = 0;  // Variable to store the tournament year
     
     do {
         display_SchedulingMenu();
@@ -356,6 +356,10 @@ void handleTournamentScheduling(
                     cout << "(*) Tournament year set to: " << tournamentYear << endl;
                     cout << "Press Enter to continue...";
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cin.get();
+                } else {
+                    cout << "(*) Using previously set tournament year: " << tournamentYear << endl;
+                    cout << "Press Enter to continue...";
                     cin.get();
                 }
                 
