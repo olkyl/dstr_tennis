@@ -9,6 +9,9 @@ using namespace std;
 // Declare the global queue as external
 extern PlayersQueue eliminatedPlayers; 
 
+// Define the global variable
+int tournamentYear = 0;
+
 // Defined in main.cpp
 extern void clearScreen();
 extern int getChoice(int max);
@@ -334,7 +337,6 @@ void handleTournamentScheduling(
 ) {
     int option;
     static bool yearInput = false;  // Flag to track if year has been input
-    static int tournamentYear = 0;  // Variable to store the tournament year
     
     do {
         display_SchedulingMenu();

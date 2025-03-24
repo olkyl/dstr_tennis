@@ -7,6 +7,9 @@
 
 using namespace std;
 
+// Declare the tournament year as an extern variable
+extern int globalYear;
+
 // Display the menu for main Task 1 actions
 void display_SchedulingMenu();
 

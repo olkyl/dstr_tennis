@@ -23,6 +23,8 @@ MatchesQueue RRmatchesQueue;
 MatchesQueue KOmatchesQueue;
 WithdrawnPlayersStack withdrawnStack;
 
+extern int tournamentYear;
+
 void clearScreen() {
 #ifdef _WIN32
     system("cls");
@@ -74,7 +76,7 @@ int main() {
                 ticketSales();
                 break;
             case 3:
-                handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, QFmatchesQueue, RRmatchesQueue, KOmatchesQueue, withdrawnStack, 2025);
+                handlePlayerWithdrawals(allPlayersQueue, eliminatedPlayers, QFmatchesQueue, RRmatchesQueue, KOmatchesQueue, withdrawnStack, tournamentYear);
                 break;
             case 4:
                 handleMatchHistory();
