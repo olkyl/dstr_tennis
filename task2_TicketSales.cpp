@@ -185,7 +185,7 @@ void ticketSales()
     cin >> numberOfPeople;
     cin.ignore();
 
-    // Quit Program When the Input is "0"
+    // Quit Program when the number of people input is "0"
     if (numberOfPeople == 0)
     {
         return;
@@ -199,6 +199,7 @@ void ticketSales()
 
         cout << "\nCustomer " << (i + 1) << " Name [Enter 0 to end]: ";
         getline(cin, clientName);
+        // Quit Program when the customer name input is 0
         if (clientName == "0")
         {
             return;
@@ -207,7 +208,9 @@ void ticketSales()
         cout << "Customer Type (VIP=3, Early-bird=2, Public Access=1) [Enter 0 to end]: ";
         cin >> priorityLevel;
         cin.ignore();
-        if (priorityLevel == 0 || priorityLevel != 3 || priorityLevel != 2 || priorityLevel != 1)
+
+        // Quit Program when the customer type input is not equal to 1,2,3
+        if (priorityLevel != 3 && priorityLevel != 2 && priorityLevel != 1)
         {
             return;
         }
