@@ -1,0 +1,19 @@
+===================================
+DateTime: Tue Mar 25 13:33:35 2025
+===================================
+--- Initial Ticket Queue ---
+Customer: Water (Public Access)
+Customer: Melon (Early-bird)
+
+--- Sales Ticket Processing ---
+Ticket sold to: Melon (Early-Bird)
+Ticket sold to: Water (Public Access)
+
+--- Spectator Entry Process ---
+Water (Public Access) has entered the venue.
+Melon (Early-Bird) has entered the venue.
+
+--- Spectator Exit Process ---
+Melon (Early-Bird) has exited the venue.
+Water (Public Access) has exited the venue.
+
